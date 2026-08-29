@@ -93,6 +93,7 @@ model WaterPoint {
   @@index([status])
   @@index([village])
   @@index([caretakerId])
+  @@index([type])
 }
 
 model Report {

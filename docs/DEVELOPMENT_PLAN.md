@@ -56,6 +56,25 @@ the whole platform can deploy as a single Vercel project against a serverless Po
 - [x] **Phase 11 — Release preparation**
   - Documentation reorganized into `docs/`, recruiter-facing root README, Vercel + Neon
     deployment guide, CI updated for the Next.js-only architecture.
+- [x] **Phase 12 — Post-launch bug fixes, mobile responsiveness, and hardening pass**
+  - Fixed the public map not rendering tiles: CSP `img-src` was silently blocking
+    `*.tile.openstreetmap.org` image requests.
+  - Fixed pie/donut chart legends overlapping card borders on the Map & Insights page.
+  - Water points directory: 3-per-row responsive grid (was single-column rows) and windowed/
+    ellipsis pagination (`1 2 3 … N`) instead of listing every page number.
+  - Login page: decluttered overlapping demo account credentials into a clean list with
+    one-click "Use account" autofill per role.
+  - Home page hero: replaced the CSS-gradient hero with a real, license-verified 4-photo
+    crossfading slideshow of Uganda water access (Wikimedia Commons, CC0/CC-BY-SA 4.0),
+    with a `/copyright` attribution section for each image.
+  - Added a mobile-first, iOS-style fixed bottom tab bar (`BottomNav`) shown below the `sm`
+    breakpoint, with role-aware tabs (Home/Water Points/Map/About plus Caretaker/Admin/Log in),
+    safe-area-inset padding, and active-route highlighting; the existing top nav remains
+    unchanged on larger screens.
+  - Database: added the missing `WaterPoint.type` index (frequently filtered, previously
+    unindexed) and re-verified all other models already have appropriate indexes/foreign keys.
+  - Fixed a `package.json` dependency-drift bug where pinned versions (Prisma 6.19.3,
+    leaflet/react-leaflet) had fallen out of sync with `package-lock.json`/`node_modules`.
 
 ## Required checks before merging a feature branch into `perez`
 
