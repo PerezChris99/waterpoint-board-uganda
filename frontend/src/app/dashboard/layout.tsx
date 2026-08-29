@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
+import { getVerifiedSession } from "@/lib/verified-session";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession();
+  const session = await getVerifiedSession();
   if (!session) redirect("/login");
 
   return (

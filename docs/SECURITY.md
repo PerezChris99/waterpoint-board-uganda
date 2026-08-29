@@ -21,6 +21,9 @@ not open a public issue for undisclosed vulnerabilities.
   middleware redirect is a UX convenience, never the sole authorization check.
 - Caretakers may only act on water points/reports they are assigned to; this is enforced
   server-side on every write, not just in the UI.
+- Sessions carry a `tokenVersion` claim checked against the database on every `requireRole()` call
+  and every dashboard page load (`getVerifiedSession()`), so logout and role changes take effect
+  immediately instead of waiting for the JWT to expire — see finding 2 below.
 
 ## Input validation
 
@@ -117,12 +120,15 @@ only the positive claims above.
    registered emails from unregistered ones. Fixed: the route now always runs a bcrypt comparison
    (against a fixed dummy hash, `DUMMY_PASSWORD_HASH` in `src/lib/password.ts`, when no user is
    found) so both branches take comparable time.
-2. **No server-side session revocation.** Sessions are stateless 7-day JWTs with no allow/deny
-   list. "Logout" only deletes the client's cookie — a copied/leaked token stays valid for the
-   rest of its 7-day life. More importantly, if an admin **changes a user's role**, that user's
-   already-issued token keeps its old role claim until it naturally expires (up to 7 days) unless
-   they happen to log out and back in. This is a real gap for a system whose core security model
-   is role-based authorization.
+2. **No server-side session revocation — fixed.** Sessions were stateless 7-day JWTs with no
+   allow/deny list: logout only deleted the client's cookie, so a copied/leaked token stayed
+   valid for the rest of its 7-day life, and a role change didn't take effect until the user's
+   token naturally expired. Fixed: `User` now has a `tokenVersion` counter, embedded in every
+   signed JWT. `requireRole()` (used by every mutating route) and the new `getVerifiedSession()`
+   (used by every dashboard page's own server-side role check) both look up the live
+   `tokenVersion` in the database on each request and reject the session if it doesn't match —
+   logout and admin role changes both increment it, so a leaked/copied token or a demoted user's
+   old token is rejected immediately, not just once it expires.
 3. **CSV export formula-injection risk — fixed.** Cells in `/api/analytics/export` were
    comma/quote-escaped but not neutralized against leading `=`, `+`, `-`, or `@` characters, which
    Excel/Sheets treat as the start of a formula. The exported `caretaker` column is sourced from a
@@ -131,24 +137,27 @@ only the positive claims above.
    admin opens the export in a spreadsheet app. Fixed: `toCsvRow()` now prefixes a leading `'`
    on any cell value starting with one of those characters, forcing spreadsheet apps to treat it
    as plain text.
-4. **Rate limiting is IP-only, not account-aware.** 10 login attempts / 15 min per IP (already
-   documented as non-distributed across serverless instances) does not stop a distributed
-   credential-stuffing attempt against one specific account from many IPs. Consider adding a
-   secondary per-account counter if this app ever handles real user data.
+4. **Rate limiting was IP-only, not account-aware — fixed.** 10 login attempts / 15 min per IP
+   (already documented as non-distributed across serverless instances) didn't stop a distributed
+   credential-stuffing attempt against one specific account from many IPs. Fixed: `POST
+   /api/auth/login` now also enforces a second limit keyed by the normalized email address, so an
+   attacker spreading login attempts against one account across many IPs is still throttled.
 5. **`deepmerge-ts` high-severity advisory** (via `@prisma/config` → `prisma` CLI, confirmed still
    present via `npm audit`) remains unresolved. It is a CLI/dev-time-only dependency — not bundled
    into deployed serverless functions — so it is not exploitable in the running production app.
    The fix requires a semver-major Prisma upgrade and has been deliberately deferred; flagged here
    so it isn't mistaken for an oversight.
-6. **Minor: role-update route returns a generic 500 instead of 404** when given a
-   non-existent user id (`prisma.user.update` throws `P2025`, caught by the generic error
-   handler). Not a security issue, just an imprecise error response.
+6. **Minor: role-update route returned a generic 500 instead of 404 — fixed.** Given a
+   non-existent user id, `prisma.user.update` threw `P2025`, caught by the generic error handler
+   and reported as a 500. Fixed: the route now checks for the user's existence first and returns
+   a clean 404 ("User not found") instead.
 7. **Demo credentials are intentionally public** (by design, already documented above) — correct
    for a portfolio demo, but a reminder that this exact pattern (public admin password in seed
    data) must never be reused as-is for a real deployment with real user data.
 
 None of the above were exploited or demonstrated against the live deployment; they are static
-code-review findings. Items 1 and 3 have been fixed as part of this review; items 2 and 4 are
-realistic, fixable future hardening opportunities; items 5–7 are either already-mitigated (not
-runtime-reachable) or cosmetic.
+code-review findings. Items 1, 2, 3, 4, and 6 have been fixed as part of this review; item 5 is
+already-mitigated (not runtime-reachable, requires a semver-major upgrade to resolve cleanly) and
+item 7 is an intentional design choice for a public portfolio demo — neither requires further
+action.
 

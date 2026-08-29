@@ -7,6 +7,7 @@ export interface SessionPayload {
   email: string;
   name: string;
   role: Role;
+  tokenVersion: number;
 }
 
 const JWT_ALG = "HS256";
@@ -35,13 +36,15 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
       typeof payload.sub === "string" &&
       typeof payload.email === "string" &&
       typeof payload.name === "string" &&
-      typeof payload.role === "string"
+      typeof payload.role === "string" &&
+      typeof payload.tokenVersion === "number"
     ) {
       return {
         sub: payload.sub,
         email: payload.email,
         name: payload.name,
         role: payload.role as Role,
+        tokenVersion: payload.tokenVersion,
       };
     }
     return null;

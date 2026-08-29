@@ -43,6 +43,7 @@ export async function POST(request: Request) {
     email: user.email,
     name: user.name,
     role: user.role,
+    tokenVersion: user.tokenVersion,
   });
   await writeAuditLog({ actorId: user.id, action: "USER_REGISTERED", entityType: "User", entityId: user.id });
 

@@ -154,6 +154,25 @@ the whole platform can deploy as a single Vercel project against a serverless Po
   - Conducted a deep-dive security review of the auth/session/RBAC/validation/rate-limit code
     and every API route; see `docs/SECURITY.md` for the full write-up of findings (strengths and
     remaining risks).
+- [x] **Phase 16 — Session revocation, account-aware rate limiting, 404 fix**
+  - Added a `tokenVersion Int @default(0)` column on `User`, embedded in every signed session
+    JWT. `requireRole()` (every mutating API route) and a new `getVerifiedSession()` helper
+    (every dashboard page's own server-side role gate, plus `/api/auth/me`) now re-check the
+    live `tokenVersion` against the database on each request/render, rejecting the session if it
+    doesn't match — closing the gap where a copied/leaked token or a demoted user's stale role
+    claim stayed valid for the rest of the JWT's 7-day life.
+  - `POST /api/auth/logout` now increments the caller's `tokenVersion` before clearing the
+    cookie, so that specific token is rejected server-side immediately, not just once the cookie
+    is gone client-side.
+  - `PATCH /api/admin/users/[id]` now increments the target user's `tokenVersion` in the same
+    update as the role change, so their already-issued token stops carrying stale permissions
+    right away.
+  - `POST /api/auth/login` now enforces a second, account-scoped rate limit (keyed by normalized
+    email, alongside the existing per-IP limit), mitigating distributed credential-stuffing
+    against one account from many IPs.
+  - `PATCH /api/admin/users/[id]` now returns a clean 404 for a non-existent user id instead of
+    falling through to a generic 500.
+  - Updated `docs/SECURITY.md` to reflect findings 2, 4, and 6 as fixed.
 
 ## Required checks before merging a feature branch into `perez`
 

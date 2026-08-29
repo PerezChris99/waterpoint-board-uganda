@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
+import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
 import { UserRoleSelect } from "@/components/user-role-select";
 import { ROLE_LABELS } from "@/lib/labels";
@@ -7,7 +7,7 @@ import { ROLE_LABELS } from "@/lib/labels";
 export const revalidate = 0;
 
 export default async function AdminUsersPage() {
-  const session = await getSession();
+  const session = await getVerifiedSession();
   if (!session || session.role !== "ADMIN") redirect("/forbidden");
 
   const users = await prisma.user.findMany({

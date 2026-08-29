@@ -20,7 +20,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       );
     }
 
-    const user = await prisma.user.update({ where: { id }, data: { role: parsed.data.role } });
+    const existing = await prisma.user.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: { message: "User not found" } }, { status: 404 });
+    }
+
+    // Bump tokenVersion so any session this user already has open is invalidated immediately —
+    // otherwise their previously-issued JWT would keep its old role claim until it expires.
+    const user = await prisma.user.update({
+      where: { id },
+      data: { role: parsed.data.role, tokenVersion: { increment: 1 } },
+    });
     await writeAuditLog({
       actorId: session.sub,
       action: "USER_ROLE_UPDATED",
