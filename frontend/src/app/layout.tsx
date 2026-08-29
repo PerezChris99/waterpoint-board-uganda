@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavBar } from "@/components/nav-bar";
 import { Footer } from "@/components/footer";
+import { BackToTop } from "@/components/back-to-top";
 import { getSession } from "@/lib/session";
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {children}
         </div>
         <Footer />
+        <BackToTop />
       </body>
     </html>
   );

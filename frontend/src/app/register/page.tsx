@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AuthShell } from "@/components/auth-shell";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -33,9 +34,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center px-4 py-16">
-      <h1 className="text-2xl font-semibold">Create a demo account</h1>
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+    <AuthShell
+      eyebrow="Join the community"
+      title="Create a demo account"
+      subtitle="Sign up to submit reports and track the water points you care about."
+    >
+      <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className="block text-sm font-medium">
             Full name
@@ -91,14 +95,14 @@ export default function RegisterPage() {
           />
         </div>
         {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-red-600 sm:col-span-2 dark:text-red-400">
             {error}
           </p>
         )}
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--wb-water-400)] disabled:opacity-60"
+          className="rounded-md bg-[var(--wb-water-500)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wb-water-400)] disabled:opacity-60 sm:col-span-2"
         >
           {submitting ? "Creating account…" : "Create account"}
         </button>
@@ -109,6 +113,6 @@ export default function RegisterPage() {
           Log in
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }

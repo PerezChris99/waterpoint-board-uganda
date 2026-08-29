@@ -25,6 +25,9 @@ export async function NavBar({
           <Link href="/water-points" className="hover:text-[var(--wb-water-500)]">
             Water Points
           </Link>
+          <Link href="/map" className="hover:text-[var(--wb-water-500)]">
+            Map &amp; Insights
+          </Link>
           <Link href="/about" className="hover:text-[var(--wb-water-500)]">
             About
           </Link>

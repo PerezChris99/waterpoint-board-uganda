@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { AuthShell } from "@/components/auth-shell";
 
 function LoginFormInner() {
   const router = useRouter();
@@ -33,10 +34,13 @@ function LoginFormInner() {
   }
 
   return (
-    <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center px-4 py-16">
-      <h1 className="text-2xl font-semibold">Log in</h1>
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-        <div>
+    <AuthShell
+      eyebrow="Welcome back"
+      title="Log in to your account"
+      subtitle="Access your dashboard, reports, and caretaker or admin tools."
+    >
+      <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-1">
           <label htmlFor="email" className="block text-sm font-medium">
             Email
           </label>
@@ -49,7 +53,7 @@ function LoginFormInner() {
             className="mt-1 w-full rounded-md border border-black/15 px-3 py-2 dark:border-white/20 dark:bg-transparent"
           />
         </div>
-        <div>
+        <div className="sm:col-span-1">
           <label htmlFor="password" className="block text-sm font-medium">
             Password
           </label>
@@ -63,20 +67,20 @@ function LoginFormInner() {
           />
         </div>
         {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-red-600 sm:col-span-2 dark:text-red-400">
             {error}
           </p>
         )}
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--wb-water-400)] disabled:opacity-60"
+          className="rounded-md bg-[var(--wb-water-500)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wb-water-400)] disabled:opacity-60 sm:col-span-2"
         >
           {submitting ? "Logging in…" : "Log in"}
         </button>
       </form>
-      <div className="mt-6 rounded-md bg-[var(--wb-surface-100)] p-3 text-xs text-black/60 dark:bg-[var(--wb-surface-800)] dark:text-white/60">
-        <p className="font-medium">Demo accounts</p>
+      <div className="mt-6 grid gap-3 rounded-md bg-[var(--wb-surface-100)] p-4 text-xs text-black/60 sm:grid-cols-3 dark:bg-[var(--wb-surface-800)] dark:text-white/60">
+        <p className="font-medium sm:col-span-3">Demo accounts</p>
         <p>admin@waterpointboard.example / Admin#2026Secure</p>
         <p>caretaker1@waterpointboard.example / Caretaker#2026</p>
         <p>member1@waterpointboard.example / Member#2026</p>
@@ -87,7 +91,7 @@ function LoginFormInner() {
           Sign up
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }
 
