@@ -15,11 +15,14 @@ export async function NavBar({
       </a>
       <nav
         aria-label="Primary"
-        className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6"
       >
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span aria-hidden className="text-lg">💧</span>
-          WaterPoint Board Uganda
+        <Link href="/" className="flex min-w-0 shrink items-center gap-1.5 font-semibold tracking-tight sm:gap-2">
+          <span aria-hidden className="shrink-0 text-lg">💧</span>
+          <span className="truncate">
+            <span className="sm:hidden">WaterPoint</span>
+            <span className="hidden sm:inline">WaterPoint Board Uganda</span>
+          </span>
         </Link>
         <div className="hidden items-center gap-6 text-sm font-medium sm:flex">
           <Link href="/water-points" className="hover:text-[var(--wb-water-500)]">
@@ -42,15 +45,15 @@ export async function NavBar({
             </Link>
           ) : null}
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex shrink-0 items-center gap-2 text-sm sm:gap-3">
           {session ? (
-            <form action="/api/auth/logout" method="post">
-              <span className="mr-3 hidden text-black/60 sm:inline dark:text-white/60">
+            <form action="/api/auth/logout" method="post" className="flex items-center gap-2 sm:gap-3">
+              <span className="hidden text-black/60 sm:inline dark:text-white/60">
                 {session.name}
               </span>
               <button
                 type="submit"
-                className="rounded-md border border-black/15 px-3 py-1.5 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+                className="whitespace-nowrap rounded-md border border-black/15 px-2.5 py-1.5 text-xs font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10 sm:px-3 sm:text-sm"
               >
                 Log out
               </button>
@@ -59,13 +62,13 @@ export async function NavBar({
             <>
               <Link
                 href="/login"
-                className="rounded-md border border-black/15 px-3 py-1.5 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+                className="whitespace-nowrap rounded-md border border-black/15 px-2.5 py-1.5 text-xs font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10 sm:px-3 sm:text-sm"
               >
                 Log in
               </Link>
               <Link
                 href="/register"
-                className="rounded-md bg-[var(--wb-water-500)] px-3 py-1.5 font-medium text-white hover:bg-[var(--wb-water-400)]"
+                className="whitespace-nowrap rounded-md bg-[var(--wb-water-500)] px-2.5 py-1.5 text-xs font-medium text-white hover:bg-[var(--wb-water-400)] sm:px-3 sm:text-sm"
               >
                 Sign up
               </Link>
