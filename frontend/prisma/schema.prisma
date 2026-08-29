@@ -1,0 +1,142 @@
+// WaterPoint Board Uganda — Prisma schema
+// Postgres-only (Neon in production). Uses `prisma db push` instead of migration
+// history: this is a deliberate simplification for a demo project with fixed seed
+// data — see docs/ARCHITECTURE.md for the rationale.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CARETAKER
+  MEMBER
+}
+
+enum WaterPointType {
+  BOREHOLE
+  SHALLOW_WELL
+  PROTECTED_SPRING
+  TAP_STAND
+  RAINWATER_HARVESTING
+}
+
+enum WaterPointStatus {
+  AVAILABLE
+  PARTIALLY_AVAILABLE
+  REPORTED_UNAVAILABLE
+  UNDER_MAINTENANCE
+  NEEDS_VERIFICATION
+}
+
+enum ReportIssueType {
+  NO_WATER
+  LOW_PRESSURE
+  CONTAMINATION_CONCERN
+  PHYSICAL_DAMAGE
+  VANDALISM
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  ACKNOWLEDGED
+  IN_PROGRESS
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  role            Role             @default(MEMBER)
+  village         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  reports         Report[]         @relation("ReporterReports")
+  caretakerOf     WaterPoint[]     @relation("Caretaker")
+  maintenanceLogs MaintenanceLog[]
+  auditLogs       AuditLog[]
+
+  @@index([role])
+}
+
+model WaterPoint {
+  id              String            @id @default(cuid())
+  code            String            @unique
+  name            String
+  type            WaterPointType
+  village         String
+  parish          String
+  subCounty       String
+  latitude        Float
+  longitude       Float
+  status          WaterPointStatus  @default(NEEDS_VERIFICATION)
+  installedYear   Int?
+  source          String
+  description     String?
+  lastVerifiedAt  DateTime?
+  caretakerId     String?
+  caretaker       User?             @relation("Caretaker", fields: [caretakerId], references: [id])
+  reports         Report[]
+  maintenanceLogs MaintenanceLog[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([status])
+  @@index([village])
+  @@index([caretakerId])
+}
+
+model Report {
+  id              String          @id @default(cuid())
+  waterPointId    String
+  waterPoint      WaterPoint      @relation(fields: [waterPointId], references: [id], onDelete: Cascade)
+  reporterId      String?
+  reporter        User?           @relation("ReporterReports", fields: [reporterId], references: [id])
+  reporterName    String?
+  issueType       ReportIssueType
+  description     String
+  status          ReportStatus    @default(OPEN)
+  resolutionNotes String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([waterPointId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model MaintenanceLog {
+  id           String     @id @default(cuid())
+  waterPointId String
+  waterPoint   WaterPoint @relation(fields: [waterPointId], references: [id], onDelete: Cascade)
+  caretakerId  String
+  caretaker    User       @relation(fields: [caretakerId], references: [id])
+  action       String
+  notes        String?
+  createdAt    DateTime   @default(now())
+
+  @@index([waterPointId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

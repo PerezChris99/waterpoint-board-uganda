@@ -1,102 +1,153 @@
 # WaterPoint Board Uganda
 
-A localized community platform for viewing and maintaining information about shared water points in one small Ugandan community.
+**A full-stack community water-point tracking platform** — built with Next.js, TypeScript,
+Prisma, and PostgreSQL, deployed on Vercel.
 
-> **Scope note:** This is a modest local community utility, not a national water-management system, a government replacement, a drinking-water certification platform, or a contamination-detection tool. Demo data is fictional and does not represent verified official information.
+[![CI](https://github.com/PerezChris99/waterpoint-board-uganda/actions/workflows/ci.yml/badge.svg)](https://github.com/PerezChris99/waterpoint-board-uganda/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/demo-waterpointboarduganda.vercel.app-2f7ec2)](https://waterpointboarduganda.vercel.app)
+[![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 
-> WaterPoint Board displays community-reported operational information. Statuses may change and should be verified locally. This platform does not certify water quality or drinking-water safety.
+**Live demo:** [waterpointboarduganda.vercel.app](https://waterpointboarduganda.vercel.app)
 
-## Status
+> **Scope note:** This is a portfolio/demonstration project modeling a small local community
+> utility — not a real government system, not a drinking-water certification platform, and not a
+> contamination-detection tool. All data (water points, users, reports) is fictional and
+> deterministic seed data. See [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
-Phase 0 — repository, frontend, and backend foundations. Later phases (public directory, authentication, reporting, caretaker tools, admin tools, analytics, security hardening, SEO/accessibility, release) are tracked in [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md).
+---
+
+## What it does
+
+WaterPoint Board Uganda tracks the operational status of community water points — boreholes,
+shallow wells, protected springs, tap stands, and rainwater tanks — for one small, fictional
+Ugandan community. It models a realistic end-to-end workflow:
+
+- **Anyone** can browse the public directory and search/filter water points by status, type, or
+  village.
+- **Community members** can report issues (no water, contamination concerns, physical damage,
+  vandalism) against any water point, with or without an account.
+- **Caretakers** get a dashboard of their assigned water points, triage open reports, update
+  status, and log maintenance history.
+- **Admins** manage user roles, review a full audit trail, and view analytics dashboards with a
+  one-click CSV export.
+
+## Feature highlights
+
+| Area | What's implemented |
+| --- | --- |
+| 🗺️ Public directory | Search + filter by status/type/village, freshness indicators, full report & maintenance history per water point |
+| 📝 Community reporting | Anonymous or authenticated issue reporting, rate-limited, validated with Zod |
+| 🧰 Caretaker tools | Per-caretaker dashboard, status updates, maintenance logging |
+| 🛠️ Admin tools | Role management, audit/activity feed, CSV export |
+| 📊 Analytics | Status/issue/village breakdowns with Recharts |
+| 🔐 Auth & RBAC | Custom credentials auth (bcrypt + signed JWT cookie), Edge middleware route protection, server-side re-checks on every mutation |
+| 🛡️ Security | CSP + security headers, input validation on every endpoint, per-IP rate limiting, audit logging |
+| ♿ Accessibility | Skip-to-content link, semantic HTML/ARIA labeling, reduced-motion support, keyboard-navigable forms |
+| 🔎 SEO | Metadata API, sitemap/robots, OpenGraph & Twitter cards |
+| 🌱 Seed data | 62 fictional water points, 24 users, hundreds of reports/maintenance logs — deterministic and idempotent |
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Framework | [Next.js](https://nextjs.org) 16 (App Router, React Server Components, Route Handlers) |
+| Language | TypeScript (strict mode) |
+| Styling | Tailwind CSS v4, CSS-variable design tokens |
+| Database / ORM | PostgreSQL ([Neon](https://neon.tech) serverless) + [Prisma](https://www.prisma.io) |
+| Auth | Custom — `bcryptjs` + `jose` (JWT), `httpOnly` cookies, Edge middleware |
+| Validation | [Zod](https://zod.dev) |
+| Charts | [Recharts](https://recharts.org) |
+| Testing | Vitest, React Testing Library, jest-axe |
+| CI/CD | GitHub Actions → Vercel |
+
+## Architecture
+
+```
+Next.js App Router (Server Components + Route Handlers)
+        |
+        |-- middleware.ts (Edge)  ->  JWT session verification, role-gated redirects
+        |-- Route Handlers (/api/**) -> Zod validation -> Prisma -> Postgres
+        v
+Prisma ORM  ->  PostgreSQL (Neon serverless)
+```
+
+One deployable service, one database — see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the
+full breakdown and the reasoning behind retiring an earlier separate-backend design.
 
 ## Project structure
 
 ```
 waterpoint-board-uganda/
-├── frontend/          Next.js + TypeScript + Tailwind CSS
-├── backend/           Flask + SQLAlchemy + PostgreSQL API
-├── docs/              Development plan and supporting docs
-├── docker-compose.yml Local development stack (frontend, backend, postgres)
-└── .github/workflows/ CI pipeline
+├── frontend/                 Next.js app (the entire product)
+│   ├── prisma/                schema.prisma + deterministic seed.ts
+│   └── src/
+│       ├── app/                routes: public pages, /dashboard/*, /api/**
+│       ├── components/         shared UI (nav, forms, charts)
+│       ├── lib/                db, auth, validation, rbac, rate-limit, audit
+│       └── middleware.ts       Edge route protection
+├── docs/                      Architecture, API, security, deployment, data methodology, etc.
+└── .github/workflows/ci.yml   Lint, typecheck, test, build
 ```
-
-## Technology stack
-
-**Frontend:** Next.js, React, TypeScript, Tailwind CSS, TanStack Query, React Hook Form, Zod, Leaflet, Recharts, Framer Motion, Vitest, React Testing Library, Playwright, axe-core.
-
-**Backend:** Flask, Flask Blueprints, SQLAlchemy, Flask-Migrate, PostgreSQL, Marshmallow, Pytest, Gunicorn.
-
-**Infrastructure:** Docker Compose, GitHub Actions CI.
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 20+
-- Python 3.12+
-- PostgreSQL 16 (or Docker)
+- Node.js ≥ 22
+- A reachable PostgreSQL database (a free [Neon](https://neon.tech) branch works great — Docker
+  is not required)
 
-### Frontend
+### Setup
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local
+cp .env.example .env.local   # fill in DATABASE_URL and JWT_SECRET
+npx prisma generate
+npx prisma db push
+npm run db:seed
 npm run dev
 ```
 
-### Backend
+Then open [http://localhost:3000](http://localhost:3000). Log in with a seeded demo account —
+see [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for credentials.
+
+### Test commands
 
 ```bash
-cd backend
-python -m venv venv
-./venv/Scripts/activate   # Windows; use `source venv/bin/activate` on macOS/Linux
-pip install -r requirements-dev.txt
-cp .env.example .env
-flask db upgrade
-python run.py
-```
-
-### Full stack with Docker Compose
-
-```bash
-docker compose up --build
-```
-
-## Environment variables
-
-See `frontend/.env.example` and `backend/.env.example` for the full list of required variables. Never commit real `.env` files.
-
-## Test commands
-
-```bash
-# Frontend
-cd frontend
 npm run lint
 npm run typecheck
 npm run test
 npm run build
-
-# Backend
-cd backend
-ruff check .
-bandit -r app -ll
-pytest -q
 ```
 
-## Security overview
+## Deployment
 
-See [SECURITY.md](SECURITY.md) for the full security model (authentication, authorization, upload handling, rate limiting, and reporting a vulnerability).
+Deployed on Vercel with a Neon Postgres database — see
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full step-by-step guide (env vars, schema push,
+seeding, and verification).
 
-## Data limitations
+## Documentation
 
-See [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md) for how status and freshness are calculated, and what this platform does and does not claim.
+| Doc | Contents |
+| --- | --- |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, data model, request flow |
+| [docs/API.md](docs/API.md) | Full Route Handler reference |
+| [docs/SECURITY.md](docs/SECURITY.md) | Auth, authorization, validation, rate limiting, known limitations |
+| [docs/PRIVACY.md](docs/PRIVACY.md) | What data is collected and why |
+| [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) | Seed data scope, demo accounts, what this platform does *not* do |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Vercel + Neon deployment guide |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Branch workflow, PR checklist |
+| [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) | Phase-by-phase build log |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Notable changes |
 
 ## Git workflow
 
-Branch flow: `feature/*` → `perez` → `main`. `main` is the production/default branch; `perez` is the integration branch. Never push directly to `main`. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+`feature/*` → `perez` (integration) → `main` (production). `main` is the default/production
+branch; never push directly to `main` or `perez` — see
+[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
-## Future improvements
+## License
 
-Public directory with map/list split view, authentication and roles, community reporting, caretaker and admin tools, descriptive analytics, security hardening, SEO/accessibility passes, and release preparation — see [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md).
+MIT — see [LICENSE](LICENSE).
+
