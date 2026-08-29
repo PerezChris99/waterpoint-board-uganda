@@ -103,6 +103,9 @@ export function BottomNav({ session }: BottomNavProps) {
   if (session?.role === "ADMIN") {
     items.push({ href: "/dashboard/admin", label: "Admin", Icon: ShieldIcon });
   }
+  if (session?.role === "MEMBER") {
+    items.push({ href: "/dashboard/member", label: "Reports", Icon: PersonIcon });
+  }
   if (!session) {
     items.push({ href: "/login", label: "Log in", Icon: PersonIcon });
   }

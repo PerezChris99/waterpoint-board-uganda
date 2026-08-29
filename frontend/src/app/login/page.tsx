@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
+import { dashboardPathForRole } from "@/lib/dashboard-path";
 
 const DEMO_ACCOUNTS = [
   { role: "Admin", email: "admin@waterpointboard.example", password: "Admin#2026Secure" },
@@ -14,7 +15,7 @@ const DEMO_ACCOUNTS = [
 function LoginFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/";
+  const next = searchParams.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,13 +36,13 @@ function LoginFormInner() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
+    const data = await response.json().catch(() => null);
     if (!response.ok) {
-      const data = await response.json().catch(() => null);
       setError(data?.error?.message ?? "Login failed");
       setSubmitting(false);
       return;
     }
-    router.push(next);
+    router.push(next || dashboardPathForRole(data?.role ?? "MEMBER"));
     router.refresh();
   }
 

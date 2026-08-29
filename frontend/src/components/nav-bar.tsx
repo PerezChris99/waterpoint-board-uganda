@@ -34,6 +34,11 @@ export async function NavBar({
           <Link href="/about" className="hover:text-[var(--wb-water-500)]">
             About
           </Link>
+          {session?.role === "MEMBER" ? (
+            <Link href="/dashboard/member" className="hover:text-[var(--wb-water-500)]">
+              My Reports
+            </Link>
+          ) : null}
           {session?.role === "CARETAKER" || session?.role === "ADMIN" ? (
             <Link href="/dashboard/caretaker" className="hover:text-[var(--wb-water-500)]">
               Caretaker

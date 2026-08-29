@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
+import { dashboardPathForRole } from "@/lib/dashboard-path";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,13 +24,13 @@ export default function RegisterPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password, village }),
     });
+    const data = await response.json().catch(() => null);
     if (!response.ok) {
-      const data = await response.json().catch(() => null);
       setError(data?.error?.message ?? "Registration failed");
       setSubmitting(false);
       return;
     }
-    router.push("/");
+    router.push(dashboardPathForRole(data?.role ?? "MEMBER"));
     router.refresh();
   }
 
