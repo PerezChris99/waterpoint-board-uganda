@@ -122,9 +122,9 @@ export default async function MapInsightsPage() {
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-black/10 p-4 dark:border-white/10">
-      <h3 className="text-sm font-semibold text-black/70 dark:text-white/70">{title}</h3>
-      <div className="mt-2">{children}</div>
+    <div className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <h3 className="shrink-0 text-sm font-semibold text-black/70 dark:text-white/70">{title}</h3>
+      <div className="mt-2 min-w-0 flex-1">{children}</div>
     </div>
   );
 }

@@ -1,16 +1,32 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
-// Four abstract, animated "scenes" evoking dawn, borehole, community, and dusk —
-// built entirely from CSS gradients/SVG so the hero never depends on external
-// images that could break or carry unclear licensing.
+// Real, verified free-license photographs taken in Uganda (Wikimedia Commons),
+// self-hosted in public/hero. See /copyright for full attribution details.
 const SCENES = [
-  "radial-gradient(circle at 20% 20%, #4f9bd9 0%, transparent 55%), radial-gradient(circle at 80% 70%, #35b9ac 0%, transparent 50%), linear-gradient(160deg, #0a1628 0%, #1e3a5f 55%, #2f7ec2 100%)",
-  "radial-gradient(circle at 75% 25%, #d99a2b 0%, transparent 45%), radial-gradient(circle at 15% 80%, #2f7ec2 0%, transparent 55%), linear-gradient(150deg, #0f2038 0%, #16283f 50%, #1e3a5f 100%)",
-  "radial-gradient(circle at 50% 15%, #5fd0c4 0%, transparent 50%), radial-gradient(circle at 85% 85%, #2b4d76 0%, transparent 55%), linear-gradient(170deg, #0a1628 0%, #2f7ec2 60%, #35b9ac 100%)",
-  "radial-gradient(circle at 30% 75%, #c1483d 0%, transparent 40%), radial-gradient(circle at 70% 20%, #4f9bd9 0%, transparent 50%), linear-gradient(160deg, #0f2038 0%, #1e3a5f 55%, #0a1628 100%)",
+  {
+    src: "/hero/hero-1-borehole-child.jpg",
+    alt: "A young child pumping water from a community borehole in rural Uganda",
+    credit: { name: "Mmukwa59", license: "CC0", url: "https://commons.wikimedia.org/wiki/File:A_young_child_fetching_water_from_a_borehole_in_a_rural_setting.jpg" },
+  },
+  {
+    src: "/hero/hero-2-tap-stand.jpg",
+    alt: "Children fetching water from a public tap stand in Uganda",
+    credit: { name: "Ronaldladu John", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Children_fetching_water_from_taps_in_rhino_camp.jpg" },
+  },
+  {
+    src: "/hero/hero-3-girl-pumping.jpg",
+    alt: "A girl pumping water from a community borehole beside a yellow jerrycan",
+    credit: { name: "Mozerayayena", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:A_girl_pumping_a_borehole.jpg" },
+  },
+  {
+    src: "/hero/hero-4-jerrycans.jpg",
+    alt: "Girls carrying jerrycans of water fetched from a borehole, balanced on their heads",
+    credit: { name: "Denis Kasozi", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Girls_carrying_jerrycans_of_water_on_the_head_06.jpg" },
+  },
 ];
 
 export function Hero() {
@@ -35,19 +51,29 @@ export function Hero() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const activeCredit = SCENES[sceneIndex].credit;
+
   return (
     <div ref={heroRef} className="relative isolate flex min-h-[88vh] items-center justify-center overflow-hidden">
       {SCENES.map((scene, i) => (
         <div
-          key={i}
-          aria-hidden
+          key={scene.src}
+          aria-hidden={i !== sceneIndex}
           className="absolute inset-0 -z-20 transition-opacity duration-[2000ms] ease-in-out"
           style={{
-            background: scene,
             opacity: i === sceneIndex ? 1 : 0,
             transform: `translateY(${offset}px) scale(1.15)`,
           }}
-        />
+        >
+          <Image
+            src={scene.src}
+            alt={scene.alt}
+            fill
+            priority={i === 0}
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
       ))}
       <svg
         aria-hidden
@@ -60,7 +86,7 @@ export function Hero() {
           d="M0,64 C240,120 480,0 720,32 C960,64 1200,120 1440,64 L1440,120 L0,120 Z"
         />
       </svg>
-      <div aria-hidden className="absolute inset-0 -z-10 bg-black/45 backdrop-blur-[2px]" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-black/55 backdrop-blur-[1px]" />
 
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 px-6 py-24 text-center text-white">
         <p className="max-w-2xl text-sm font-medium tracking-[0.2em] text-[var(--wb-teal-300)] uppercase">
@@ -86,6 +112,16 @@ export function Hero() {
           </Link>
         </div>
       </div>
+
+      <a
+        href={activeCredit.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-3 right-3 z-10 rounded bg-black/40 px-2 py-1 text-[10px] text-white/70 backdrop-blur transition-colors hover:text-white"
+      >
+        Photo: {activeCredit.name} · {activeCredit.license} · Wikimedia Commons
+      </a>
     </div>
   );
 }
+
