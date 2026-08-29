@@ -75,6 +75,13 @@ the whole platform can deploy as a single Vercel project against a serverless Po
     unindexed) and re-verified all other models already have appropriate indexes/foreign keys.
   - Fixed a `package.json` dependency-drift bug where pinned versions (Prisma 6.19.3,
     leaflet/react-leaflet) had fallen out of sync with `package-lock.json`/`node_modules`.
+  - Top nav bar: fixed the mobile Log in/Sign up buttons wrapping/distorting on narrow
+    viewports (brand text and buttons were competing for space with no `shrink-0`/
+    `whitespace-nowrap`); brand text now abbreviates to "WaterPoint" below the `sm`
+    breakpoint and buttons keep a fixed, neat pill size at every width.
+  - Hardening pass: added a `Strict-Transport-Security` header, a safety-cap (`take: 2000`)
+    on the unbounded `/api/water-points` query, and a `/api/health` liveness endpoint for
+    uptime monitoring.
 
 ## Required checks before merging a feature branch into `perez`
 

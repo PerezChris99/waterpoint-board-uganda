@@ -30,8 +30,15 @@ touching the database. Prisma's parameterized queries prevent SQL injection.
 ## Transport & headers
 
 `next.config.ts` sets `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
-`Referrer-Policy: strict-origin-when-cross-origin`, a restrictive `Permissions-Policy`, and a
+`Referrer-Policy: strict-origin-when-cross-origin`, a restrictive `Permissions-Policy`,
+`Strict-Transport-Security` (2-year max-age, includeSubDomains, preload), and a
 `Content-Security-Policy` on every response.
+
+## Health & monitoring
+
+`GET /api/health` runs a trivial `SELECT 1` against the database and returns `503` on failure —
+intended for uptime monitors and load-balancer health checks, not a substitute for real
+observability (no error-tracking/APM is wired up yet; see Known limitations).
 
 ## Rate limiting
 
@@ -47,6 +54,9 @@ submission per IP.
 - `Content-Security-Policy` allows `'unsafe-inline'` for `script-src`/`style-src` because Next.js
   injects inline hydration data and Tailwind emits inline styles; a stricter nonce-based CSP is a
   reasonable future hardening step.
+- No error-tracking/APM (e.g. Sentry) is wired up; server errors are only visible in platform logs.
+- `/api/water-points` has a hard `take: 2000` safety cap but no real offset/cursor pagination —
+  fine at current (~60 seed points) scale, worth revisiting before a large real-world rollout.
 
 ## Audit logging
 
