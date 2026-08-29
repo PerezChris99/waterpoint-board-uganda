@@ -43,6 +43,33 @@ export default function CopyrightPage() {
           </ul>
         </section>
         <section>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">Map and routing credits</h2>
+          <p className="mt-2">
+            The live map uses{" "}
+            <a href="https://maplibre.org" target="_blank" rel="noopener noreferrer" className="underline">
+              MapLibre GL JS
+            </a>{" "}
+            with free vector tiles from{" "}
+            <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer" className="underline">
+              OpenFreeMap
+            </a>
+            , built on map data &copy;{" "}
+            <a
+              href="https://www.openstreetmap.org/copyright"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              OpenStreetMap contributors
+            </a>
+            . Road directions are calculated by the free{" "}
+            <a href="https://project-osrm.org" target="_blank" rel="noopener noreferrer" className="underline">
+              OSRM
+            </a>{" "}
+            routing service.
+          </p>
+        </section>
+        <section>
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Demo data disclaimer</h2>
           <p className="mt-2">
             All water point, report, and user data visible on the public demo instance is fictional

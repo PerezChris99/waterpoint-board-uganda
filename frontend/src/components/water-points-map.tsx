@@ -54,6 +54,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
   const mapRef = useRef<MapLibreMap | null>(null);
   const userLocationRef = useRef<{ lat: number; lng: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [routingId, setRoutingId] = useState<string | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
@@ -126,8 +127,9 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
+    // GPS-grade accuracy: force a fresh device fix every time, never a cached/network-derived one.
     const geolocate = new maplibregl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
+      positionOptions: { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
       trackUserLocation: true,
       showUserLocation: true,
       showAccuracyCircle: true,
@@ -136,17 +138,21 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
 
     geolocate.on("geolocate", (position: GeolocationPosition) => {
       setLocationError(null);
+      setLocationAccuracy(position.coords.accuracy);
       setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
     });
     geolocate.on("error", (err: GeolocationPositionError) => {
       setLocationError(
         err.code === err.PERMISSION_DENIED
-          ? "Location access was denied. Allow location access to see water points near you."
+          ? "Location access was denied. Allow location access in your browser to see water points near you."
           : "Couldn't determine your location. Try again.",
       );
     });
 
     map.on("load", () => {
+      // Prompt for location as soon as the map is ready, instead of waiting for a button click.
+      geolocate.trigger();
+
       map.addSource("water-points", {
         type: "geojson",
         data: {
@@ -250,7 +256,8 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
   return (
     <div>
       <p className="mb-2 text-xs text-black/50 dark:text-white/50">
-        Tap the <span aria-hidden>◎</span> location button on the map to find water points near you.
+        Your browser will ask to share your location so we can show water points near you. You can
+        also tap the <span aria-hidden>◎</span> button on the map to try again anytime.
       </p>
       <div
         ref={containerRef}
@@ -263,7 +270,14 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
       )}
       {userLocation && nearest.length > 0 && (
         <div className="mt-4 rounded-xl border border-black/10 p-4 dark:border-white/10">
-          <h3 className="text-sm font-semibold">Nearest water points to you</h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold">Nearest water points to you</h3>
+            {locationAccuracy != null && (
+              <span className="shrink-0 text-xs text-black/40 dark:text-white/40">
+                GPS accuracy ±{Math.round(locationAccuracy)}m
+              </span>
+            )}
+          </div>
           {routeError && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{routeError}</p>}
           <ul className="mt-3 flex flex-col gap-2">
             {nearest.map((wp) => (

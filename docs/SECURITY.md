@@ -30,7 +30,9 @@ touching the database. Prisma's parameterized queries prevent SQL injection.
 ## Transport & headers
 
 `next.config.ts` sets `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
-`Referrer-Policy: strict-origin-when-cross-origin`, a restrictive `Permissions-Policy`,
+`Referrer-Policy: strict-origin-when-cross-origin`, a restrictive `Permissions-Policy`
+(`geolocation=(self)` so only this site's own origin — the `/map` page — can request the
+browser's location; `camera`/`microphone` remain fully disabled),
 `Strict-Transport-Security` (2-year max-age, includeSubDomains, preload), and a
 `Content-Security-Policy` on every response.
 
@@ -46,7 +48,9 @@ The live map (`/map`) uses **MapLibre GL JS** with the free **OpenFreeMap** vect
 the free public **OSRM** demo server for turn-by-turn, road-accurate routing from a user's shared
 location to a water point. Neither requires an API key. Browser geolocation itself never leaves
 the client except as coordinates sent directly to OSRM to compute a route — no location data is
-stored server-side.
+stored server-side. The page requests a fresh, high-accuracy (GPS-preferred) location as soon as
+it loads; the browser's own permission prompt still governs whether this is allowed, and nothing
+is requested if the visitor declines.
 
 ## Rate limiting
 
