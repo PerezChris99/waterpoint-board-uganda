@@ -15,8 +15,8 @@ not open a public issue for undisclosed vulnerabilities.
 ## Authorization
 
 - Role-based access control with three roles: `ADMIN`, `CARETAKER`, `MEMBER`.
-- `src/middleware.ts` blocks unauthenticated/unauthorized requests to `/dashboard/admin/*` and
-  `/dashboard/caretaker/*` at the Edge, before the page renders.
+- `src/middleware.ts` blocks unauthenticated/unauthorized requests to `/dashboard/admin/*`,
+  `/dashboard/caretaker/*`, and `/dashboard/member/*` at the Edge, before the page renders.
 - Every mutating Route Handler independently re-verifies the role via `requireRole()` — the
   middleware redirect is a UX convenience, never the sole authorization check.
 - Caretakers may only act on water points/reports they are assigned to; this is enforced
@@ -40,6 +40,14 @@ touching the database. Prisma's parameterized queries prevent SQL injection.
 intended for uptime monitors and load-balancer health checks, not a substitute for real
 observability (no error-tracking/APM is wired up yet; see Known limitations).
 
+## Third-party services (map & routing)
+
+The live map (`/map`) uses **MapLibre GL JS** with the free **OpenFreeMap** vector-tile style and
+the free public **OSRM** demo server for turn-by-turn, road-accurate routing from a user's shared
+location to a water point. Neither requires an API key. Browser geolocation itself never leaves
+the client except as coordinates sent directly to OSRM to compute a route — no location data is
+stored server-side.
+
 ## Rate limiting
 
 An in-memory limiter (`src/lib/rate-limit.ts`) throttles login, registration, and report
@@ -57,6 +65,10 @@ submission per IP.
 - No error-tracking/APM (e.g. Sentry) is wired up; server errors are only visible in platform logs.
 - `/api/water-points` has a hard `take: 2000` safety cap but no real offset/cursor pagination —
   fine at current (~60 seed points) scale, worth revisiting before a large real-world rollout.
+- The OSRM public demo routing server (`router.project-osrm.org`) is explicitly documented by
+  its maintainers as light-use/evaluation-only, not a production SLA. At real-world scale this
+  should move to a self-hosted OSRM instance or a paid routing provider. OpenFreeMap's tile
+  service is intended for production use and has no such caveat.
 
 ## Audit logging
 

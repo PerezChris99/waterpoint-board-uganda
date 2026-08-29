@@ -82,6 +82,31 @@ the whole platform can deploy as a single Vercel project against a serverless Po
   - Hardening pass: added a `Strict-Transport-Security` header, a safety-cap (`take: 2000`)
     on the unbounded `/api/water-points` query, and a `/api/health` liveness endpoint for
     uptime monitoring.
+- [x] **Phase 13 — Role-based dashboards, map overhaul, and performance/quality pass**
+  - Login/registration now redirect straight to a role-specific dashboard (`/dashboard/admin`,
+    `/dashboard/caretaker`, `/dashboard/member`) instead of the public home page; added a new
+    Member dashboard showing a user's own submitted reports with live status and caretaker
+    resolution notes.
+  - Replaced Leaflet + raster OpenStreetMap tiles with **MapLibre GL JS** (WebGL vector-tile
+    rendering) using the free, no-API-key **OpenFreeMap** "liberty" style — noticeably faster
+    pan/zoom than DOM-based raster tiles.
+  - Map now has a working **"find my location"** control (browser geolocation), a **nearest
+    water points** list computed client-side (haversine distance) once location is shared, and
+    real **road-network-accurate routing** (not a straight line) from the user to a selected
+    water point via the free public **OSRM** demo routing API — documented as a light-use-only
+    dependency, see Known limitations in `docs/SECURITY.md`.
+  - Fixed the mobile top-nav Log in/Sign up buttons wrapping/distorting on narrow viewports.
+  - Added a real water-droplet browser tab icon (`icon.svg`), removing the default Next.js logo
+    favicon.
+  - Re-sourced hero photos from their true, full-resolution Wikimedia Commons originals (two of
+    the four images had been serving needlessly downscaled 960×540 copies) and re-compressed all
+    four with mozjpeg at quality 82 — sharper on wide screens and smaller on the wire.
+  - Added `loading.tsx` route-level skeletons on every data-heavy page (water points, map, water
+    point detail, all dashboards) so navigation shows instant feedback instead of a blank page
+    while the server component fetches data.
+  - CSP updated for the map change: dropped the now-unused OpenStreetMap raster tile `img-src`
+    allowance, added `connect-src` entries for OpenFreeMap/OSRM and a `worker-src`/`child-src
+    blob:` allowance required by MapLibre GL's web worker.
 
 ## Required checks before merging a feature branch into `perez`
 
