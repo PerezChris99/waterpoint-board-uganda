@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Hero } from "@/components/hero";
 
 const FEATURES = [
   {
@@ -22,46 +23,56 @@ const FEATURES = [
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
-      <section className="mx-auto flex w-full max-w-3xl flex-col justify-center gap-6 px-6 py-16 sm:py-24">
-        <p className="text-sm font-medium tracking-wide text-[var(--wb-water-500)] uppercase">
-          Community water-point tracker
-        </p>
-        <h1 className="text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-          WaterPoint Board Uganda
-        </h1>
-        <p className="max-w-xl text-base text-[var(--foreground)]/80">
-          Reported water-point conditions for one small Ugandan community — full public directory,
-          community reporting, caretaker and admin dashboards, and analytics, built as a
-          production-shaped full-stack demo.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/water-points"
-            className="w-fit rounded-md bg-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--wb-water-400)]"
-          >
-            Explore water points
-          </Link>
-          <Link
-            href="/register"
-            className="w-fit rounded-md border border-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-[var(--wb-water-500)] transition-colors hover:bg-[var(--wb-water-500)] hover:text-white"
-          >
-            Create a demo account
-          </Link>
+      <Hero />
+
+      <section className="border-t border-black/10 bg-[var(--wb-surface-100)] py-16 dark:bg-[var(--wb-surface-800)]">
+        <div className="mx-auto max-w-5xl px-6 text-center">
+          <p className="text-sm font-medium tracking-wide text-[var(--wb-water-500)] uppercase">
+            What you can do here
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold text-[var(--foreground)]">
+            One platform, every role covered
+          </h2>
         </div>
-        <p className="max-w-xl text-xs text-[var(--foreground)]/60">
-          WaterPoint Board displays community-reported operational information. Statuses may change
-          and should be verified locally. This platform does not certify water quality or
-          drinking-water safety.
-        </p>
-      </section>
-      <section className="border-t border-black/10 bg-[var(--wb-surface-100)] py-14 dark:bg-[var(--wb-surface-800)]">
-        <div className="mx-auto grid max-w-5xl gap-6 px-6 sm:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-5xl gap-6 px-6 sm:grid-cols-2">
           {FEATURES.map((feature) => (
-            <div key={feature.title} className="rounded-lg border border-black/10 bg-[var(--background)] p-5 dark:border-white/10">
-              <h2 className="font-semibold text-[var(--foreground)]">{feature.title}</h2>
+            <div
+              key={feature.title}
+              className="rounded-lg border border-black/10 bg-[var(--background)] p-5 text-center transition-transform hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 sm:text-left"
+            >
+              <h3 className="font-semibold text-[var(--foreground)]">{feature.title}</h3>
               <p className="mt-1.5 text-sm text-[var(--foreground)]/70">{feature.body}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 text-center">
+          <h2 className="text-2xl font-semibold">Ready to explore?</h2>
+          <p className="max-w-xl text-[var(--foreground)]/70">
+            Create a free account to submit reports, or jump straight into the public directory and
+            live map — no sign-up required to browse.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/water-points"
+              className="w-fit rounded-md bg-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--wb-water-400)]"
+            >
+              Explore water points
+            </Link>
+            <Link
+              href="/register"
+              className="w-fit rounded-md border border-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-[var(--wb-water-500)] transition-colors hover:bg-[var(--wb-water-500)] hover:text-white"
+            >
+              Create a demo account
+            </Link>
+          </div>
+          <p className="max-w-xl text-xs text-[var(--foreground)]/60">
+            WaterPoint Board displays community-reported operational information. Statuses may change
+            and should be verified locally. This platform does not certify water quality or
+            drinking-water safety.
+          </p>
         </div>
       </section>
     </main>
