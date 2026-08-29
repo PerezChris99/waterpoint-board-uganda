@@ -107,6 +107,28 @@ the whole platform can deploy as a single Vercel project against a serverless Po
   - CSP updated for the map change: dropped the now-unused OpenStreetMap raster tile `img-src`
     allowance, added `connect-src` entries for OpenFreeMap/OSRM and a `worker-src`/`child-src
     blob:` allowance required by MapLibre GL's web worker.
+- [x] **Phase 14 — Geolocation auto-prompt, page redesigns, and legal updates**
+  - Fixed a `Permissions-Policy: geolocation=()` header left over from the Phase 12 hardening
+    pass that was silently blocking the Geolocation API for the page origin — the browser
+    permission prompt could never appear no matter what the map code did. Changed to
+    `geolocation=(self)`.
+  - The map page now calls `GeolocateControl.trigger()` as soon as the map style finishes
+    loading, so visitors are prompted for location automatically on page open instead of having
+    to find and click the location button first.
+  - Tuned `positionOptions` (`enableHighAccuracy: true`, `maximumAge: 0`, `timeout: 15000`) to
+    always request a fresh, GPS-grade device fix rather than a cached or network-derived one, and
+    surfaced the device-reported accuracy (in metres) next to the nearest-water-points list for
+    transparency.
+  - Redesigned the About page into a newspaper-style two-column layout (with a drop-cap opening
+    paragraph) for the main story, followed by a new animated, scroll-triggered timeline
+    (`AnimatedTimeline` component, IntersectionObserver-based, respects
+    `prefers-reduced-motion`) walking through how a report becomes a fix.
+  - Redesigned the water point detail page: the overview, report form, recent reports, and
+    maintenance history are now four cards in a responsive 2×2 grid instead of stacked
+    full-width sections.
+  - Updated the Privacy Policy, Terms of Service, and Copyright & Licensing pages to disclose the
+    map's use of device geolocation (opt-in, browser-only, never stored server-side) and to
+    credit/disclaim the third-party MapLibre GL, OpenFreeMap, OpenStreetMap, and OSRM services.
 
 ## Required checks before merging a feature branch into `perez`
 

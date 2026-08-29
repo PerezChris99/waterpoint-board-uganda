@@ -61,7 +61,17 @@ export default function TermsPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">6. No warranty</h2>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">6. Location and mapping services</h2>
+          <p className="mt-2">
+            The map page uses your device&rsquo;s location (with your permission) and free third-party
+            services — OpenFreeMap for map tiles and OSRM for road-based directions — to show nearby
+            water points and routes. These services are provided independently of WaterPoint Board
+            Uganda; we do not control and are not responsible for their availability or the accuracy of
+            a suggested route. Always exercise your own judgement about the safest way to travel.
+          </p>
+        </section>
+        <section>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">7. No warranty</h2>
           <p className="mt-2">
             The platform is provided &ldquo;as is&rdquo;, without warranty of any kind. We do not
             guarantee uninterrupted availability, and we are not liable for decisions made based on
@@ -69,7 +79,7 @@ export default function TermsPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">7. Changes to these terms</h2>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">8. Changes to these terms</h2>
           <p className="mt-2">
             We may update these terms as the platform evolves. Continued use after changes take
             effect constitutes acceptance of the revised terms.

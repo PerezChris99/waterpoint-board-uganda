@@ -61,81 +61,85 @@ export default async function WaterPointDetailPage({
         </span>
       </div>
 
-      <dl className="mt-6 grid grid-cols-2 gap-4 rounded-lg border border-black/10 p-4 text-sm sm:grid-cols-3 dark:border-white/10">
-        <div>
-          <dt className="text-black/50 dark:text-white/50">Source</dt>
-          <dd className="mt-0.5 font-medium">{waterPoint.source}</dd>
-        </div>
-        <div>
-          <dt className="text-black/50 dark:text-white/50">Installed</dt>
-          <dd className="mt-0.5 font-medium">{waterPoint.installedYear ?? "Unknown"}</dd>
-        </div>
-        <div>
-          <dt className="text-black/50 dark:text-white/50">Caretaker</dt>
-          <dd className="mt-0.5 font-medium">{waterPoint.caretaker?.name ?? "Unassigned"}</dd>
-        </div>
-      </dl>
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-lg border border-black/10 p-5 dark:border-white/10">
+          <h2 className="text-lg font-semibold">Overview</h2>
+          <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <dt className="text-black/50 dark:text-white/50">Source</dt>
+              <dd className="mt-0.5 font-medium">{waterPoint.source}</dd>
+            </div>
+            <div>
+              <dt className="text-black/50 dark:text-white/50">Installed</dt>
+              <dd className="mt-0.5 font-medium">{waterPoint.installedYear ?? "Unknown"}</dd>
+            </div>
+            <div>
+              <dt className="text-black/50 dark:text-white/50">Caretaker</dt>
+              <dd className="mt-0.5 font-medium">{waterPoint.caretaker?.name ?? "Unassigned"}</dd>
+            </div>
+          </dl>
+          {waterPoint.description && (
+            <p className="mt-4 text-sm text-black/70 dark:text-white/70">{waterPoint.description}</p>
+          )}
+        </section>
 
-      {waterPoint.description && (
-        <p className="mt-4 text-sm text-black/70 dark:text-white/70">{waterPoint.description}</p>
-      )}
+        <section className="rounded-lg border border-black/10 p-5 dark:border-white/10">
+          <h2 className="text-lg font-semibold">Report an issue</h2>
+          <p className="mt-1 text-sm text-black/60 dark:text-white/60">
+            Seen a problem here? Let the caretaker know.
+          </p>
+          <div className="mt-4">
+            <ReportForm waterPointId={waterPoint.id} />
+          </div>
+        </section>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">Report an issue</h2>
-        <p className="mt-1 text-sm text-black/60 dark:text-white/60">
-          Seen a problem here? Let the caretaker know.
-        </p>
-        <div className="mt-4">
-          <ReportForm waterPointId={waterPoint.id} />
-        </div>
-      </section>
+        <section className="rounded-lg border border-black/10 p-5 dark:border-white/10">
+          <h2 className="text-lg font-semibold">Recent reports</h2>
+          {waterPoint.reports.length === 0 ? (
+            <p className="mt-2 text-sm text-black/60 dark:text-white/60">No reports yet.</p>
+          ) : (
+            <ul className="mt-4 flex flex-col gap-3">
+              {waterPoint.reports.map((report) => (
+                <li key={report.id} className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{ISSUE_LABELS[report.issueType]}</span>
+                    <span className="text-xs text-black/50 dark:text-white/50">
+                      {REPORT_STATUS_LABELS[report.status]}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-black/70 dark:text-white/70">{report.description}</p>
+                  <p className="mt-1 text-xs text-black/40 dark:text-white/40">
+                    {report.createdAt.toLocaleDateString()}
+                    {report.reporterName ? ` · ${report.reporterName}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">Recent reports</h2>
-        {waterPoint.reports.length === 0 ? (
-          <p className="mt-2 text-sm text-black/60 dark:text-white/60">No reports yet.</p>
-        ) : (
-          <ul className="mt-4 flex flex-col gap-3">
-            {waterPoint.reports.map((report) => (
-              <li key={report.id} className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{ISSUE_LABELS[report.issueType]}</span>
-                  <span className="text-xs text-black/50 dark:text-white/50">
-                    {REPORT_STATUS_LABELS[report.status]}
-                  </span>
-                </div>
-                <p className="mt-1 text-black/70 dark:text-white/70">{report.description}</p>
-                <p className="mt-1 text-xs text-black/40 dark:text-white/40">
-                  {report.createdAt.toLocaleDateString()}
-                  {report.reporterName ? ` · ${report.reporterName}` : ""}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">Maintenance history</h2>
-        {waterPoint.maintenanceLogs.length === 0 ? (
-          <p className="mt-2 text-sm text-black/60 dark:text-white/60">No maintenance logged yet.</p>
-        ) : (
-          <ul className="mt-4 flex flex-col gap-3">
-            {waterPoint.maintenanceLogs.map((log) => (
-              <li key={log.id} className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{log.action}</span>
-                  <span className="text-xs text-black/50 dark:text-white/50">
-                    {log.createdAt.toLocaleDateString()}
-                  </span>
-                </div>
-                {log.notes && <p className="mt-1 text-black/70 dark:text-white/70">{log.notes}</p>}
-                <p className="mt-1 text-xs text-black/40 dark:text-white/40">by {log.caretaker.name}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <section className="rounded-lg border border-black/10 p-5 dark:border-white/10">
+          <h2 className="text-lg font-semibold">Maintenance history</h2>
+          {waterPoint.maintenanceLogs.length === 0 ? (
+            <p className="mt-2 text-sm text-black/60 dark:text-white/60">No maintenance logged yet.</p>
+          ) : (
+            <ul className="mt-4 flex flex-col gap-3">
+              {waterPoint.maintenanceLogs.map((log) => (
+                <li key={log.id} className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{log.action}</span>
+                    <span className="text-xs text-black/50 dark:text-white/50">
+                      {log.createdAt.toLocaleDateString()}
+                    </span>
+                  </div>
+                  {log.notes && <p className="mt-1 text-black/70 dark:text-white/70">{log.notes}</p>}
+                  <p className="mt-1 text-xs text-black/40 dark:text-white/40">by {log.caretaker.name}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </main>
   );
 }
