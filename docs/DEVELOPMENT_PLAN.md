@@ -129,6 +129,31 @@ the whole platform can deploy as a single Vercel project against a serverless Po
   - Updated the Privacy Policy, Terms of Service, and Copyright & Licensing pages to disclose the
     map's use of device geolocation (opt-in, browser-only, never stored server-side) and to
     credit/disclaim the third-party MapLibre GL, OpenFreeMap, OpenStreetMap, and OSRM services.
+- [x] **Phase 15 — Nationwide seed data, logout bug fix, footer cleanup, security audit**
+  - Fixed logout redirecting to `localhost` in production: `POST /api/auth/logout` derived its
+    redirect target from `process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"`; now
+    builds the redirect from the incoming request's own origin (`new URL("/", request.url)`)
+    instead, removing the env-var dependency entirely.
+  - Reworked `prisma/seed.ts`'s geography: water points were previously jittered around a single
+    fictional coordinate (a ~20km box), giving the impression of one clustered community. Water
+    points (now 153, up from 62) are generated across 24 real Ugandan towns/cities and all five
+    Kampala divisions, using each location's real approximate centre coordinates with a small
+    (~3km) jitter — weighted more heavily around Kampala/Wakiso/Entebbe/Mukono, matching real
+    population density, while still covering the north (Gulu, Lira, Arua, Kitgum, Moroto), east
+    (Jinja, Mbale, Tororo, Soroti, Iganga), and west (Mbarara, Kabale, Fort Portal, Kasese,
+    Hoima, Masaka). Site-level names/details remain fictional demo data. Reseeded the shared
+    Neon database with the new distribution (153 water points, 338 reports, 301 maintenance
+    logs, 24 users).
+  - Map page: default zoom is now a whole-country view (was zoom 12, a city-block level) and the
+    map automatically fits its bounds to every loaded water point on load, instead of assuming a
+    single local cluster.
+  - Footer: removed the redundant plain-text "Contact" column (email/phone/WhatsApp written out
+    as literal text) — the icon-based contact row (WhatsApp/Email/Call) in the brand column is
+    now the sole contact surface. Updated `privacy`/`copyright` page wording that referenced
+    "the details in the footer" to specifically say "the contact icons in the site footer".
+  - Conducted a deep-dive security review of the auth/session/RBAC/validation/rate-limit code
+    and every API route; see `docs/SECURITY.md` for the full write-up of findings (strengths and
+    remaining risks).
 
 ## Required checks before merging a feature branch into `perez`
 

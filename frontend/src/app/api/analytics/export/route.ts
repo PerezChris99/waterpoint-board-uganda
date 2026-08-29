@@ -5,7 +5,13 @@ import { requireRole, apiErrorResponse } from "@/lib/rbac";
 function toCsvRow(values: (string | number | null | undefined)[]): string {
   return values
     .map((v) => {
-      const s = v === null || v === undefined ? "" : String(v);
+      let s = v === null || v === undefined ? "" : String(v);
+      // Neutralize spreadsheet formula injection: a cell starting with =, +, -, or @ is
+      // interpreted as a formula by Excel/Sheets when the CSV is opened. Prefixing with a
+      // single quote forces it to be treated as plain text.
+      if (/^[=+\-@]/.test(s)) {
+        s = `'${s}`;
+      }
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     })
     .join(",");

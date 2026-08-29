@@ -115,13 +115,13 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
             waterPoints.reduce((sum, wp) => sum + wp.longitude, 0) / waterPoints.length,
             waterPoints.reduce((sum, wp) => sum + wp.latitude, 0) / waterPoints.length,
           ]
-        : [32.318, 0.912];
+        : [32.2903, 1.3733]; // geographic centre of Uganda, used only if no water points loaded
 
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: STYLE_URL,
       center,
-      zoom: 12,
+      zoom: 6.6, // whole-country view; refined to fit all points once loaded below
     });
     mapRef.current = map;
 
@@ -192,6 +192,14 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
           "circle-stroke-color": "#ffffff",
         },
       });
+
+      if (waterPoints.length > 0) {
+        const nationalBounds = new maplibregl.LngLatBounds();
+        for (const wp of waterPoints) {
+          nationalBounds.extend([wp.longitude, wp.latitude]);
+        }
+        map.fitBounds(nationalBounds, { padding: 40, maxZoom: 13, duration: 0 });
+      }
 
       map.on("mouseenter", "water-points-circle", () => {
         map.getCanvas().style.cursor = "pointer";

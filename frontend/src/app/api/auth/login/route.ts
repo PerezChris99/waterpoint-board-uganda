@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyPassword } from "@/lib/password";
+import { verifyPassword, DUMMY_PASSWORD_HASH } from "@/lib/password";
 import { createSessionCookie } from "@/lib/session";
 import { loginSchema } from "@/lib/validation";
 import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
@@ -23,7 +23,9 @@ export async function POST(request: Request) {
 
   const { email, password } = parsed.data;
   const user = await prisma.user.findUnique({ where: { email } });
-  const validPassword = user ? await verifyPassword(password, user.passwordHash) : false;
+  // Always run a bcrypt comparison, even for a non-existent user (against a fixed dummy hash),
+  // so the response time doesn't leak whether the email is registered.
+  const validPassword = await verifyPassword(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
 
   if (!user || !validPassword) {
     return NextResponse.json({ error: { message: "Invalid email or password" } }, { status: 401 });
