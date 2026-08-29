@@ -5,6 +5,7 @@ import { SESSION_COOKIE } from "@/lib/session";
 const ROLE_PREFIXES: Record<string, string[]> = {
   "/dashboard/admin": ["ADMIN"],
   "/dashboard/caretaker": ["ADMIN", "CARETAKER"],
+  "/dashboard/member": ["ADMIN", "CARETAKER", "MEMBER"],
 };
 
 export async function middleware(request: NextRequest) {

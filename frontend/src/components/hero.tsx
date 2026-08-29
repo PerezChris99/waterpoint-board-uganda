@@ -70,6 +70,7 @@ export function Hero() {
             alt={scene.alt}
             fill
             priority={i === 0}
+            quality={82}
             sizes="100vw"
             className="object-cover"
           />
