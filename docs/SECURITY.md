@@ -68,7 +68,7 @@ submission per IP.
   reasonable future hardening step.
 - No error-tracking/APM (e.g. Sentry) is wired up; server errors are only visible in platform logs.
 - `/api/water-points` has a hard `take: 2000` safety cap but no real offset/cursor pagination —
-  fine at current (~60 seed points) scale, worth revisiting before a large real-world rollout.
+  fine at current (~150 seed points) scale, worth revisiting before a large real-world rollout.
 - The OSRM public demo routing server (`router.project-osrm.org`) is explicitly documented by
   its maintainers as light-use/evaluation-only, not a production SLA. At real-world scale this
   should move to a self-hosted OSRM instance or a paid routing provider. OpenFreeMap's tile
@@ -83,3 +83,72 @@ metadata — never with secrets.
 ## Dependency scanning
 
 `npm audit` runs in CI (non-blocking) on every pull request.
+
+## Security audit findings (2026, deep review)
+
+A focused, code-grounded review of every authentication, session, RBAC, validation, rate-limit,
+and API route file. Listed honestly — strengths and remaining gaps both — rather than restating
+only the positive claims above.
+
+### Confirmed strengths
+
+- Every mutating/per-ID route (`reports/[id]`, `water-points/[id]`, `admin/users/[id]`,
+  `maintenance-logs`) independently re-checks the caller's role **and**, for `CARETAKER`s, that
+  they own the specific water point being acted on — verified by reading every route handler, not
+  just the shared `requireRole()` helper. There is no route that trusts client-supplied IDs
+  without an ownership check.
+- The only raw SQL in the codebase is the static, non-interpolated `SELECT 1` in `/api/health`.
+  No `$queryRawUnsafe`/string-built SQL exists anywhere — confirmed by a workspace-wide search.
+- `.env` is gitignored at both the repo root and inside `frontend/`; only `.env.example` (with
+  placeholder values) is committed. No real secret ever appears in the git history that was
+  reviewed.
+- The public, unauthenticated `/api/public/insights` endpoint deliberately selects only
+  non-PII fields (verified against its Prisma `select`) — no reporter identity, email, or
+  caretaker name is exposed to anonymous visitors.
+- `JWT_SECRET` is validated at runtime to be 32+ characters before it's ever used to sign/verify
+  a token, so a misconfigured short secret fails loudly instead of silently weakening sessions.
+
+### Findings / remaining risks
+
+1. **Login user-enumeration timing side channel — fixed.** `POST /api/auth/login` previously
+   only ran `bcrypt.compare` when a user with the given email existed, so a request for a
+   non-existent email returned almost immediately while a wrong password for a real email took
+   the full bcrypt (cost 12) comparison time — a patient attacker could statistically distinguish
+   registered emails from unregistered ones. Fixed: the route now always runs a bcrypt comparison
+   (against a fixed dummy hash, `DUMMY_PASSWORD_HASH` in `src/lib/password.ts`, when no user is
+   found) so both branches take comparable time.
+2. **No server-side session revocation.** Sessions are stateless 7-day JWTs with no allow/deny
+   list. "Logout" only deletes the client's cookie — a copied/leaked token stays valid for the
+   rest of its 7-day life. More importantly, if an admin **changes a user's role**, that user's
+   already-issued token keeps its old role claim until it naturally expires (up to 7 days) unless
+   they happen to log out and back in. This is a real gap for a system whose core security model
+   is role-based authorization.
+3. **CSV export formula-injection risk — fixed.** Cells in `/api/analytics/export` were
+   comma/quote-escaped but not neutralized against leading `=`, `+`, `-`, or `@` characters, which
+   Excel/Sheets treat as the start of a formula. The exported `caretaker` column is sourced from a
+   user's self-chosen registration `name` field (only length-validated, no character
+   restriction), so a caretaker could pick a name that becomes an executable formula when an
+   admin opens the export in a spreadsheet app. Fixed: `toCsvRow()` now prefixes a leading `'`
+   on any cell value starting with one of those characters, forcing spreadsheet apps to treat it
+   as plain text.
+4. **Rate limiting is IP-only, not account-aware.** 10 login attempts / 15 min per IP (already
+   documented as non-distributed across serverless instances) does not stop a distributed
+   credential-stuffing attempt against one specific account from many IPs. Consider adding a
+   secondary per-account counter if this app ever handles real user data.
+5. **`deepmerge-ts` high-severity advisory** (via `@prisma/config` → `prisma` CLI, confirmed still
+   present via `npm audit`) remains unresolved. It is a CLI/dev-time-only dependency — not bundled
+   into deployed serverless functions — so it is not exploitable in the running production app.
+   The fix requires a semver-major Prisma upgrade and has been deliberately deferred; flagged here
+   so it isn't mistaken for an oversight.
+6. **Minor: role-update route returns a generic 500 instead of 404** when given a
+   non-existent user id (`prisma.user.update` throws `P2025`, caught by the generic error
+   handler). Not a security issue, just an imprecise error response.
+7. **Demo credentials are intentionally public** (by design, already documented above) — correct
+   for a portfolio demo, but a reminder that this exact pattern (public admin password in seed
+   data) must never be reused as-is for a real deployment with real user data.
+
+None of the above were exploited or demonstrated against the live deployment; they are static
+code-review findings. Items 1 and 3 have been fixed as part of this review; items 2 and 4 are
+realistic, fixable future hardening opportunities; items 5–7 are either already-mitigated (not
+runtime-reachable) or cosmetic.
+

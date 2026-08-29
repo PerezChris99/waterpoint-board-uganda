@@ -30,8 +30,8 @@ export default function CopyrightPage() {
             This platform was built with public-sector and NGO adoption in mind. District water
             offices, national water ministries, and NGOs running WASH programmes are welcome to
             enquire about a licensed deployment for their own communities — with their own real data,
-            branding, and infrastructure. Contact us using the details in the footer to discuss
-            adoption, customization, or a managed deployment.
+            branding, and infrastructure. Contact us using the contact icons in the site footer to
+            discuss adoption, customization, or a managed deployment.
           </p>
         </section>
         <section>

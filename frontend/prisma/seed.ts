@@ -38,15 +38,48 @@ const weightedPick = <T,>(entries: [T, number][]): T => {
 const randInt = (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 
-// --- Fictional geography: one composite sub-county, invented village names ---
-const SUB_COUNTY = "Kiruli Sub-county";
-const PARISHES = ["Katooke", "Nsangwa", "Bulembo", "Kagoma", "Lwanda", "Ssango"];
-const VILLAGES = [
-  "Kiruli Central", "Nabbaale", "Kasenyi Landing", "Bugoto", "Mirembe",
-  "Kaboyo", "Nsonga", "Kigoye", "Rwansinga", "Katooke Trading Centre",
-  "Nsangwa West", "Bulembo East", "Kagoma Hill", "Lwanda Village", "Ssango Farms",
-  "Nakiwumbi", "Kabembe", "Bwaise Bulungi", "Kansanga Ridge", "Ntinda Fields",
+// --- Geography: real Uganda towns/cities, jittered around each real centre ---
+// Coordinates are real town/city centres so the map reflects true national coverage;
+// the exact water point within each town remains fictional demo data (see docs/DATA-METHODOLOGY.md).
+interface Region {
+  label: string; // town/division name shown in the "village" field
+  district: string; // shown in the "subCounty" field
+  lat: number;
+  lon: number;
+  weight: number; // relative number of water points generated here
+}
+const REGIONS: Region[] = [
+  { label: "Kampala Central", district: "Kampala District — Central Division", lat: 0.3136, lon: 32.5811, weight: 10 },
+  { label: "Kawempe", district: "Kampala District — Kawempe Division", lat: 0.36, lon: 32.57, weight: 9 },
+  { label: "Nakawa", district: "Kampala District — Nakawa Division", lat: 0.335, lon: 32.61, weight: 9 },
+  { label: "Makindye", district: "Kampala District — Makindye Division", lat: 0.285, lon: 32.6, weight: 8 },
+  { label: "Rubaga", district: "Kampala District — Rubaga Division", lat: 0.3, lon: 32.55, weight: 8 },
+  { label: "Wakiso", district: "Wakiso District", lat: 0.4044, lon: 32.4593, weight: 9 },
+  { label: "Entebbe", district: "Wakiso District — Entebbe Municipality", lat: 0.0512, lon: 32.4637, weight: 6 },
+  { label: "Mukono", district: "Mukono District", lat: 0.3533, lon: 32.7554, weight: 7 },
+  { label: "Jinja", district: "Jinja District", lat: 0.4479, lon: 33.2026, weight: 8 },
+  { label: "Iganga", district: "Iganga District", lat: 0.6072, lon: 33.4686, weight: 5 },
+  { label: "Mbale", district: "Mbale District", lat: 1.0827, lon: 34.175, weight: 6 },
+  { label: "Tororo", district: "Tororo District", lat: 0.6928, lon: 34.1808, weight: 5 },
+  { label: "Soroti", district: "Soroti District", lat: 1.7146, lon: 33.6113, weight: 5 },
+  { label: "Lira", district: "Lira District", lat: 2.235, lon: 32.9096, weight: 6 },
+  { label: "Gulu", district: "Gulu District", lat: 2.7746, lon: 32.299, weight: 6 },
+  { label: "Kitgum", district: "Kitgum District", lat: 3.2833, lon: 32.8833, weight: 4 },
+  { label: "Arua", district: "Arua District", lat: 3.0306, lon: 30.9111, weight: 5 },
+  { label: "Hoima", district: "Hoima District", lat: 1.4356, lon: 31.3517, weight: 5 },
+  { label: "Fort Portal", district: "Kabarole District — Fort Portal", lat: 0.671, lon: 30.2748, weight: 5 },
+  { label: "Kasese", district: "Kasese District", lat: 0.1833, lon: 30.0833, weight: 5 },
+  { label: "Mbarara", district: "Mbarara District", lat: -0.6072, lon: 30.6545, weight: 7 },
+  { label: "Kabale", district: "Kabale District", lat: -1.2486, lon: 29.9884, weight: 5 },
+  { label: "Masaka", district: "Masaka District", lat: -0.3369, lon: 31.7343, weight: 6 },
+  { label: "Moroto", district: "Moroto District", lat: 2.5333, lon: 34.6667, weight: 4 },
 ];
+const PARISH_SUFFIXES = ["Central", "North", "South", "East", "West"];
+const VILLAGE_SUFFIXES = ["Trading Centre", "Landing Site", "Estate", "Hill", "Ward", "Farms"];
+const ALL_VILLAGES = REGIONS.flatMap((r) => VILLAGE_SUFFIXES.map((s) => `${r.label} ${s}`));
+// Real-world coordinate jitter per point, roughly +/-3km, so points cluster near — but don't all
+// stack on — each town's true centre.
+const JITTER_DEG = 0.03;
 const SOURCES = [
   "Ministry of Water and Environment",
   "District Local Government",
@@ -54,9 +87,9 @@ const SOURCES = [
   "UNICEF WASH Programme (fictional demo record)",
   "Water For People (fictional demo record)",
   "Community Self-Help Fund",
-  "Kiruli Sub-county Water Committee",
+  "Local Water User Committee",
 ];
-const CENTER = { lat: 0.912, lon: 32.318 }; // fictional cluster, central Uganda-ish
+
 
 const TYPE_WEIGHTS: [WaterPointType, number][] = [
   ["BOREHOLE", 40],
@@ -150,7 +183,7 @@ async function main() {
       email: "admin@waterpointboard.example",
       passwordHash: adminPassword,
       role: "ADMIN" as Role,
-      village: "Kiruli Central",
+      village: "Kampala Central Estate",
     },
   });
 
@@ -164,7 +197,7 @@ async function main() {
           email: `caretaker${i + 1}@waterpointboard.example`,
           passwordHash: caretakerPassword,
           role: "CARETAKER" as Role,
-          village: pick(VILLAGES),
+          village: pick(ALL_VILLAGES),
         },
       }),
     );
@@ -180,44 +213,47 @@ async function main() {
           email: `member${i + 1}@waterpointboard.example`,
           passwordHash: memberPassword,
           role: "MEMBER" as Role,
-          village: pick(VILLAGES),
+          village: pick(ALL_VILLAGES),
         },
       }),
     );
   }
   console.log(`Created ${1 + caretakers.length + members.length} users.`);
 
-  // --- Water points (vast, realistic) ---
-  const TOTAL_WATER_POINTS = 62;
+  // --- Water points (vast, realistic, spread across real Uganda towns and cities) ---
   const waterPoints = [];
-  for (let i = 0; i < TOTAL_WATER_POINTS; i++) {
-    const village = VILLAGES[i % VILLAGES.length];
-    const type = weightedPick(TYPE_WEIGHTS);
-    const status = weightedPick(STATUS_WEIGHTS);
-    const caretaker = pick(caretakers);
-    const code = `WP-${String(i + 1).padStart(3, "0")}`;
-    const installedYear = randInt(1998, 2023);
-    const lastVerifiedDays = randInt(0, 120);
+  let seq = 0;
+  for (const region of REGIONS) {
+    for (let j = 0; j < region.weight; j++) {
+      const village = `${region.label} ${pick(VILLAGE_SUFFIXES)}`;
+      const parish = `${region.label} ${pick(PARISH_SUFFIXES)}`;
+      const type = weightedPick(TYPE_WEIGHTS);
+      const status = weightedPick(STATUS_WEIGHTS);
+      const caretaker = pick(caretakers);
+      const code = `WP-${String(++seq).padStart(3, "0")}`;
+      const installedYear = randInt(1998, 2023);
+      const lastVerifiedDays = randInt(0, 120);
 
-    const wp = await prisma.waterPoint.create({
-      data: {
-        code,
-        name: `${village} ${typeLabel(type)} ${(i % VILLAGES.length) + 1}`,
-        type,
-        village,
-        parish: pick(PARISHES),
-        subCounty: SUB_COUNTY,
-        latitude: CENTER.lat + (rng() - 0.5) * 0.18,
-        longitude: CENTER.lon + (rng() - 0.5) * 0.18,
-        status,
-        installedYear,
-        source: pick(SOURCES),
-        description: `${typeLabel(type)} serving ${village} and nearby households.`,
-        lastVerifiedAt: status === "NEEDS_VERIFICATION" ? null : daysAgo(lastVerifiedDays),
-        caretakerId: caretaker.id,
-      },
-    });
-    waterPoints.push(wp);
+      const wp = await prisma.waterPoint.create({
+        data: {
+          code,
+          name: `${village} ${typeLabel(type)} ${j + 1}`,
+          type,
+          village,
+          parish,
+          subCounty: region.district,
+          latitude: region.lat + (rng() - 0.5) * JITTER_DEG,
+          longitude: region.lon + (rng() - 0.5) * JITTER_DEG,
+          status,
+          installedYear,
+          source: pick(SOURCES),
+          description: `${typeLabel(type)} serving ${village} and nearby households.`,
+          lastVerifiedAt: status === "NEEDS_VERIFICATION" ? null : daysAgo(lastVerifiedDays),
+          caretakerId: caretaker.id,
+        },
+      });
+      waterPoints.push(wp);
+    }
   }
   console.log(`Created ${waterPoints.length} water points.`);
 

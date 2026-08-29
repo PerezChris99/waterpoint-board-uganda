@@ -94,7 +94,7 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Your rights</h2>
           <p className="mt-2">
             Account holders may request access to, correction of, or deletion of their personal
-            account data at any time by contacting us using the details in the footer of this site.
+            account data at any time by contacting us using the contact icons in the site footer.
           </p>
         </section>
         <section>

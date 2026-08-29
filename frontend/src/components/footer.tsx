@@ -71,7 +71,7 @@ const LEGAL_LINKS = [
 export function Footer() {
   return (
     <footer className="border-t border-black/10 bg-[var(--wb-surface-100)] text-sm dark:border-white/10 dark:bg-[var(--wb-surface-800)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
         <div>
           <p className="flex items-center gap-2 text-base font-semibold">
             <span aria-hidden>💧</span> WaterPoint Board Uganda
@@ -120,27 +120,6 @@ export function Footer() {
                 </Link>
               </li>
             ))}
-          </ul>
-        </div>
-
-        <div>
-          <p className="font-semibold text-[var(--foreground)]">Contact</p>
-          <ul className="mt-3 space-y-2 text-black/60 dark:text-white/60">
-            <li>
-              <a href={`mailto:${EMAIL}`} className="hover:text-[var(--wb-water-500)]">
-                {EMAIL}
-              </a>
-            </li>
-            <li>
-              <a href={`tel:+${PHONE_NUMBER}`} className="hover:text-[var(--wb-water-500)]">
-                +{PHONE_NUMBER}
-              </a>
-            </li>
-            <li>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--wb-water-500)]">
-                WhatsApp us
-              </a>
-            </li>
           </ul>
         </div>
       </div>
