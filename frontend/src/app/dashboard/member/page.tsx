@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
+import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
 import { ISSUE_LABELS, REPORT_STATUS_LABELS } from "@/lib/labels";
 
@@ -15,7 +15,7 @@ const STATUS_TONE_CLASSES: Record<string, string> = {
 };
 
 export default async function MemberDashboardPage() {
-  const session = await getSession();
+  const session = await getVerifiedSession();
   if (!session) redirect("/login");
 
   const reports = await prisma.report.findMany({

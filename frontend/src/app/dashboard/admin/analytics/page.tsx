@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
+import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
 import { STATUS_LABELS, ISSUE_LABELS } from "@/lib/labels";
 import { StatusPieChart, IssueBarChart } from "@/components/charts";
@@ -12,7 +12,7 @@ function daysAgo(days: number): Date {
 }
 
 export default async function AdminAnalyticsPage() {
-  const session = await getSession();
+  const session = await getVerifiedSession();
   if (!session || session.role !== "ADMIN") redirect("/forbidden");
 
   const [statusGroups, issueGroups, villageGroups, reportsLast30Days] = await Promise.all([

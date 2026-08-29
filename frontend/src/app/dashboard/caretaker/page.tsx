@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
+import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
 import { StatusBadge } from "@/components/status-badge";
 import { CaretakerActions } from "@/components/caretaker-actions";
@@ -8,7 +8,7 @@ import { ISSUE_LABELS, REPORT_STATUS_LABELS } from "@/lib/labels";
 export const revalidate = 0;
 
 export default async function CaretakerDashboardPage() {
-  const session = await getSession();
+  const session = await getVerifiedSession();
   if (!session || (session.role !== "CARETAKER" && session.role !== "ADMIN")) {
     redirect("/forbidden");
   }

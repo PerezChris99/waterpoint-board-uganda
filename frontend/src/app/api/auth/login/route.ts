@@ -22,6 +22,17 @@ export async function POST(request: Request) {
   }
 
   const { email, password } = parsed.data;
+
+  // Secondary, account-scoped limit: catches credential-stuffing spread across many IPs
+  // against one specific account, which the IP-only limit above can't see.
+  const accountLimit = rateLimit(`login:account:${email}`, 10, 15 * 60 * 1000);
+  if (!accountLimit.allowed) {
+    return NextResponse.json(
+      { error: { message: "Too many login attempts. Try again later." } },
+      { status: 429 },
+    );
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
   // Always run a bcrypt comparison, even for a non-existent user (against a fixed dummy hash),
   // so the response time doesn't leak whether the email is registered.
@@ -36,6 +47,7 @@ export async function POST(request: Request) {
     email: user.email,
     name: user.name,
     role: user.role,
+    tokenVersion: user.tokenVersion,
   });
   await writeAuditLog({ actorId: user.id, action: "USER_LOGIN", entityType: "User", entityId: user.id });
 

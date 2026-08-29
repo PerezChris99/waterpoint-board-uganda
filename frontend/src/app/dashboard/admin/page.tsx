@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getSession } from "@/lib/session";
+import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
 import { REPORT_STATUS_LABELS } from "@/lib/labels";
 
 export const revalidate = 0;
 
 export default async function AdminOverviewPage() {
-  const session = await getSession();
+  const session = await getVerifiedSession();
   if (!session || session.role !== "ADMIN") redirect("/forbidden");
 
   const [totalUsers, totalWaterPoints, totalReports, openReports, recentAudit] = await Promise.all([

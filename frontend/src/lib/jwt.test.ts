@@ -13,6 +13,7 @@ describe("session JWT", () => {
       email: "test@example.com",
       name: "Test User",
       role: "MEMBER",
+      tokenVersion: 0,
     });
     const payload = await verifySessionToken(token);
     expect(payload).toEqual({
@@ -20,6 +21,7 @@ describe("session JWT", () => {
       email: "test@example.com",
       name: "Test User",
       role: "MEMBER",
+      tokenVersion: 0,
     });
   });
 
@@ -29,6 +31,7 @@ describe("session JWT", () => {
       email: "test@example.com",
       name: "Test User",
       role: "MEMBER",
+      tokenVersion: 0,
     });
     const tampered = token.slice(0, -2) + "xx";
     await expect(verifySessionToken(tampered)).resolves.toBeNull();
