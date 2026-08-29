@@ -5,6 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
 
+const DEMO_ACCOUNTS = [
+  { role: "Admin", email: "admin@waterpointboard.example", password: "Admin#2026Secure" },
+  { role: "Caretaker", email: "caretaker1@waterpointboard.example", password: "Caretaker#2026" },
+  { role: "Member", email: "member1@waterpointboard.example", password: "Member#2026" },
+];
+
 function LoginFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -13,6 +19,12 @@ function LoginFormInner() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  function fillDemo(demoEmail: string, demoPassword: string) {
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError("");
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -79,11 +91,34 @@ function LoginFormInner() {
           {submitting ? "Logging in…" : "Log in"}
         </button>
       </form>
-      <div className="mt-6 grid gap-3 rounded-md bg-[var(--wb-surface-100)] p-4 text-xs text-black/60 sm:grid-cols-3 dark:bg-[var(--wb-surface-800)] dark:text-white/60">
-        <p className="font-medium sm:col-span-3">Demo accounts</p>
-        <p>admin@waterpointboard.example / Admin#2026Secure</p>
-        <p>caretaker1@waterpointboard.example / Caretaker#2026</p>
-        <p>member1@waterpointboard.example / Member#2026</p>
+      <div className="mt-6 rounded-md border border-black/10 bg-[var(--wb-surface-100)] p-4 dark:border-white/10 dark:bg-[var(--wb-surface-800)]">
+        <p className="text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50">
+          Demo accounts
+        </p>
+        <ul className="mt-3 flex flex-col gap-2">
+          {DEMO_ACCOUNTS.map((account) => (
+            <li
+              key={account.email}
+              className="flex flex-col gap-2 rounded-md border border-black/10 bg-[var(--background)] px-3 py-2 text-xs dark:border-white/10 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <span className="mr-2 inline-block rounded-full bg-[var(--wb-water-500)]/10 px-2 py-0.5 font-medium text-[var(--wb-water-500)]">
+                  {account.role}
+                </span>
+                <span className="block truncate font-mono text-black/70 dark:text-white/70 sm:inline">
+                  {account.email}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => fillDemo(account.email, account.password)}
+                className="shrink-0 self-start rounded-md border border-black/15 px-2.5 py-1 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10 sm:self-auto"
+              >
+                Use account
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
       <p className="mt-4 text-sm text-black/60 dark:text-white/60">
         No account?{" "}

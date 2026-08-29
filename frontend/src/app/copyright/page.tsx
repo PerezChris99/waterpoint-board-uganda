@@ -53,6 +53,63 @@ export default function CopyrightPage() {
             page for details.
           </p>
         </section>
+        <section>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">Photo credits</h2>
+          <p className="mt-2">
+            The home page hero slideshow uses real photographs of water access in Uganda, sourced
+            from Wikimedia Commons under free licenses:
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>
+              &ldquo;A young child fetching water from a borehole in a rural setting&rdquo; by Mmukwa59 —{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:A_young_child_fetching_water_from_a_borehole_in_a_rural_setting.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                CC0, via Wikimedia Commons
+              </a>
+              .
+            </li>
+            <li>
+              &ldquo;Children fetching water from taps in rhino camp&rdquo; by Ronaldladu John —{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Children_fetching_water_from_taps_in_rhino_camp.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                CC BY-SA 4.0, via Wikimedia Commons
+              </a>
+              .
+            </li>
+            <li>
+              &ldquo;A girl pumping a borehole&rdquo; by Mozerayayena —{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:A_girl_pumping_a_borehole.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                CC BY-SA 4.0, via Wikimedia Commons
+              </a>
+              .
+            </li>
+            <li>
+              &ldquo;Girls carrying jerrycans of water on the head&rdquo; by Denis Kasozi —{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Girls_carrying_jerrycans_of_water_on_the_head_06.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                CC BY-SA 4.0, via Wikimedia Commons
+              </a>
+              .
+            </li>
+          </ul>
+        </section>
       </div>
     </main>
   );

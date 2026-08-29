@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export const revalidate = 0;
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 9;
 
 interface SearchParams {
   status?: string;
@@ -21,6 +21,23 @@ interface SearchParams {
   q?: string;
   page?: string;
 }
+
+type PageToken = number | "ellipsis";
+
+function buildPageTokens(current: number, total: number): PageToken[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const tokens: PageToken[] = [1];
+  const left = Math.max(2, current - 1);
+  const right = Math.min(total - 1, current + 1);
+  if (left > 2) tokens.push("ellipsis");
+  for (let p = left; p <= right; p++) tokens.push(p);
+  if (right < total - 1) tokens.push("ellipsis");
+  tokens.push(total);
+  return tokens;
+}
+
 
 export default async function WaterPointsPage({
   searchParams,
@@ -140,29 +157,29 @@ export default async function WaterPointsPage({
         </button>
       </form>
 
-      <ul className="mx-auto mt-8 grid max-w-3xl gap-4">
+      <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {waterPoints.map((wp) => (
           <li key={wp.id}>
             <Link
               href={`/water-points/${wp.id}`}
-              className="flex flex-col gap-3 rounded-lg border border-black/10 p-5 transition-shadow hover:shadow-md dark:border-white/10 sm:flex-row sm:items-center sm:justify-between"
+              className="flex h-full flex-col gap-3 rounded-lg border border-black/10 p-5 transition-shadow hover:shadow-md dark:border-white/10"
             >
-              <div>
+              <div className="flex items-start justify-between gap-2">
                 <p className="text-xs font-mono text-black/40 dark:text-white/40">{wp.code}</p>
-                <h2 className="mt-1 font-semibold">{wp.name}</h2>
+                <StatusBadge status={wp.status} />
+              </div>
+              <div>
+                <h2 className="font-semibold">{wp.name}</h2>
                 <p className="mt-0.5 text-sm text-black/60 dark:text-white/60">
                   {TYPE_LABELS[wp.type]} · {wp.village}
                 </p>
               </div>
-              <div className="flex flex-col items-start gap-2 sm:items-end">
-                <StatusBadge status={wp.status} />
-                <p className="text-xs text-black/50 dark:text-white/50">
-                  {wp._count.reports} report{wp._count.reports === 1 ? "" : "s"}
-                  {wp.lastVerifiedAt
-                    ? ` · verified ${wp.lastVerifiedAt.toLocaleDateString()}`
-                    : " · not yet verified"}
-                </p>
-              </div>
+              <p className="mt-auto text-xs text-black/50 dark:text-white/50">
+                {wp._count.reports} report{wp._count.reports === 1 ? "" : "s"}
+                {wp.lastVerifiedAt
+                  ? ` · verified ${wp.lastVerifiedAt.toLocaleDateString()}`
+                  : " · not yet verified"}
+              </p>
             </Link>
           </li>
         ))}
@@ -175,7 +192,7 @@ export default async function WaterPointsPage({
       )}
 
       {totalPages > 1 && (
-        <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-2 text-sm">
+        <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2 text-sm">
           <Link
             href={pageHref(Math.max(1, currentPage - 1))}
             aria-disabled={currentPage === 1}
@@ -185,20 +202,26 @@ export default async function WaterPointsPage({
           >
             ← Prev
           </Link>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <Link
-              key={p}
-              href={pageHref(p)}
-              aria-current={p === currentPage ? "page" : undefined}
-              className={`rounded-md px-3 py-1.5 ${
-                p === currentPage
-                  ? "bg-[var(--wb-water-500)] font-medium text-white"
-                  : "border border-black/15 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
-              }`}
-            >
-              {p}
-            </Link>
-          ))}
+          {buildPageTokens(currentPage, totalPages).map((token, i) =>
+            token === "ellipsis" ? (
+              <span key={`ellipsis-${i}`} className="px-1.5 text-black/40 dark:text-white/40">
+                …
+              </span>
+            ) : (
+              <Link
+                key={token}
+                href={pageHref(token)}
+                aria-current={token === currentPage ? "page" : undefined}
+                className={`rounded-md px-3 py-1.5 ${
+                  token === currentPage
+                    ? "bg-[var(--wb-water-500)] font-medium text-white"
+                    : "border border-black/15 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+                }`}
+              >
+                {token}
+              </Link>
+            ),
+          )}
           <Link
             href={pageHref(Math.min(totalPages, currentPage + 1))}
             aria-disabled={currentPage === totalPages}

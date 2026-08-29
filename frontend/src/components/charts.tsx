@@ -18,17 +18,19 @@ import {
 
 const COLORS = ["#2f7ec2", "#35b9ac", "#d99a2b", "#c1483d", "#5fd0c4", "#1e3a5f", "#7c5cbf", "#e07b39"];
 
+const LEGEND_STYLE = { fontSize: 11, lineHeight: "1.5rem", paddingTop: 8 };
+
 export function StatusPieChart({ data }: { data: { name: string; value: number }[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+    <ResponsiveContainer width="100%" height={300} minWidth={0}>
+      <PieChart margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+        <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="42%" outerRadius={70}>
           {data.map((_, index) => (
             <Cell key={index} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip />
-        <Legend />
+        <Legend wrapperStyle={LEGEND_STYLE} iconSize={9} />
       </PieChart>
     </ResponsiveContainer>
   );
@@ -36,16 +38,16 @@ export function StatusPieChart({ data }: { data: { name: string; value: number }
 
 export function DonutChart({ data }: { data: { name: string; value: number }[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
+    <ResponsiveContainer width="100%" height={300} minWidth={0}>
+      <PieChart margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
         <Pie
           data={data}
           dataKey="value"
           nameKey="name"
           cx="50%"
-          cy="50%"
-          innerRadius={55}
-          outerRadius={90}
+          cy="42%"
+          innerRadius={42}
+          outerRadius={70}
           paddingAngle={2}
         >
           {data.map((_, index) => (
@@ -53,7 +55,7 @@ export function DonutChart({ data }: { data: { name: string; value: number }[] }
           ))}
         </Pie>
         <Tooltip />
-        <Legend />
+        <Legend wrapperStyle={LEGEND_STYLE} iconSize={9} />
       </PieChart>
     </ResponsiveContainer>
   );
@@ -61,10 +63,10 @@ export function DonutChart({ data }: { data: { name: string; value: number }[] }
 
 export function IssueBarChart({ data }: { data: { name: string; value: number }[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data}>
-        <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />
-        <YAxis allowDecimals={false} />
+    <ResponsiveContainer width="100%" height={300} minWidth={0}>
+      <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={64} />
+        <YAxis allowDecimals={false} width={28} tick={{ fontSize: 11 }} />
         <Tooltip />
         <Bar dataKey="value" fill="#2f7ec2" radius={[4, 4, 0, 0]} />
       </BarChart>
@@ -74,11 +76,11 @@ export function IssueBarChart({ data }: { data: { name: string; value: number }[
 
 export function TrendLineChart({ data }: { data: { month: string; value: number }[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data}>
+    <ResponsiveContainer width="100%" height={300} minWidth={0}>
+      <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-        <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-        <YAxis allowDecimals={false} />
+        <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+        <YAxis allowDecimals={false} width={28} tick={{ fontSize: 11 }} />
         <Tooltip />
         <Line type="monotone" dataKey="value" stroke="#35b9ac" strokeWidth={2} dot={{ r: 3 }} />
       </LineChart>
