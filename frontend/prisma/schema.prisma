@@ -69,8 +69,8 @@ model User {
 }
 
 model WaterPoint {
-  id              String            @id @default(cuid())
-  code            String            @unique
+  id              String           @id @default(cuid())
+  code            String           @unique
   name            String
   type            WaterPointType
   village         String
@@ -78,17 +78,17 @@ model WaterPoint {
   subCounty       String
   latitude        Float
   longitude       Float
-  status          WaterPointStatus  @default(NEEDS_VERIFICATION)
+  status          WaterPointStatus @default(NEEDS_VERIFICATION)
   installedYear   Int?
   source          String
   description     String?
   lastVerifiedAt  DateTime?
   caretakerId     String?
-  caretaker       User?             @relation("Caretaker", fields: [caretakerId], references: [id])
+  caretaker       User?            @relation("Caretaker", fields: [caretakerId], references: [id])
   reports         Report[]
   maintenanceLogs MaintenanceLog[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([status])
   @@index([village])

@@ -23,6 +23,7 @@ export async function GET(request: Request) {
       name: q ? { contains: q, mode: "insensitive" } : undefined,
     },
     orderBy: { name: "asc" },
+    take: 2000, // safety cap: pagination/filtering happens client-side, this just bounds worst-case payload size
     select: {
       id: true,
       code: true,
