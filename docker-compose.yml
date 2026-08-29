@@ -16,23 +16,6 @@ services:
       timeout: 5s
       retries: 10
 
-  backend:
-    build:
-      context: ./backend
-    restart: unless-stopped
-    env_file:
-      - ./backend/.env
-    environment:
-      DATABASE_URL: postgresql://waterpoint:waterpoint@postgres:5432/waterpoint
-      FLASK_ENV: development
-    ports:
-      - "5000:5000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./backend:/app
-
   frontend:
     build:
       context: ./frontend
@@ -40,15 +23,12 @@ services:
     env_file:
       - ./frontend/.env.local
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:5000/api/v1
+      DATABASE_URL: postgresql://waterpoint:waterpoint@postgres:5432/waterpoint
     ports:
       - "3000:3000"
     depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      postgres:
+        condition: service_healthy
 
 volumes:
   waterpoint_postgres_data:

@@ -9,7 +9,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.mts"],
     css: true,
-    pool: "threads",
+    pool: "forks",
   },
   resolve: {
     alias: {
