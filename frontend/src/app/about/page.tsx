@@ -58,7 +58,7 @@ export default function AboutPage() {
             <strong className="text-[var(--foreground)]">WaterPoint Board Uganda</strong> started as a
             simple question: what if every person standing at a broken pump could report it in under a
             minute, and what if the person responsible for fixing it saw that report the same day? What
-            if a sub-county water officer could see, at a glance, exactly which of the 60+ water points
+            if a sub-county water officer could see, at a glance, exactly which of the 150+ water points
             under their care needed attention — instead of waiting for a phone call that might never
             come?
           </p>

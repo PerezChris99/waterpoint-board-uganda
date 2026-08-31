@@ -1,5 +1,7 @@
+import { BrandMark } from "@/components/brand-mark";
+
 const HIGHLIGHTS = [
-  { label: "62", detail: "water points tracked" },
+  { label: "153", detail: "water points tracked" },
   { label: "24", detail: "community accounts" },
   { label: "3", detail: "roles: member, caretaker, admin" },
 ];
@@ -19,17 +21,9 @@ export function AuthShell({
     <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
       <div className="grid w-full max-w-6xl overflow-hidden rounded-2xl border border-black/10 shadow-xl shadow-black/5 dark:border-white/10 lg:grid-cols-[1.1fr_1fr]">
         <div className="relative hidden flex-col justify-between overflow-hidden bg-[linear-gradient(160deg,#0a1628_0%,#1e3a5f_55%,#2f7ec2_100%)] p-10 text-white lg:flex">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--wb-teal-400)]/30 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-20 -left-10 h-72 w-72 rounded-full bg-[var(--wb-water-400)]/30 blur-3xl"
-          />
           <div className="relative z-10">
             <p className="flex items-center gap-2 text-lg font-semibold">
-              <span aria-hidden>💧</span> WaterPoint Board Uganda
+              <BrandMark className="h-5 w-5 text-[var(--wb-teal-300)]" /> WaterPoint Board Uganda
             </p>
             <p className="mt-6 text-2xl font-semibold leading-snug">
               Real-time water infrastructure tracking, built for communities and governments alike.
