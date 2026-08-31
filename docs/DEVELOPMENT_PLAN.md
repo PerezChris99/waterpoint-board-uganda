@@ -173,6 +173,26 @@ the whole platform can deploy as a single Vercel project against a serverless Po
   - `PATCH /api/admin/users/[id]` now returns a clean 404 for a non-existent user id instead of
     falling through to a generic 500.
   - Updated `docs/SECURITY.md` to reflect findings 2, 4, and 6 as fixed.
+- [x] **Phase 17 — Design blueprint adoption and anti-AI-generic audit**
+  - Added `docs/DESIGN_BLUEPRINT.md`, the standing design/implementation standard for this
+    project going forward — an anti-"vibe-coded" checklist (no default purple/blue gradients,
+    no decorative glow blobs, no emoji-as-icon, restrained motion, product-specific visual
+    language) to be applied to all future UI work.
+  - Audited the existing layout/components against it. Findings and fixes:
+    - `AuthShell` (login/register side panel) had two purely decorative blurred glow blobs
+      (`blur-3xl` circles) with no informational value — removed.
+    - The 💧 emoji was used as the brand mark in the nav bar, footer, and `AuthShell` — replaced
+      with a new shared `BrandMark` SVG component (a simple droplet glyph) for consistent,
+      platform-independent rendering, matching the custom-SVG icon system already used
+      elsewhere (e.g. `BottomNav`'s `DropletIcon`).
+    - Stale water-point counts left over from before the Phase 15 reseed ("62" in `AuthShell`'s
+      stat highlights, "60+" in the About page, "~62" in `docs/DEPLOYMENT.md`) corrected to the
+      current 153-point dataset.
+    - Everything else audited (home page structure, hero, status badges, charts, forms,
+      navigation, dashboards) was already consistent with the blueprint — semantic color
+      tokens, restrained single-use motion (hero parallax respects `prefers-reduced-motion`,
+      timeline reveal is on the blueprint's own allowed-list), custom SVG icons, and no
+      pill-badge/gradient-text/glassmorphism-everywhere patterns — so left unchanged.
 
 ## Required checks before merging a feature branch into `perez`
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 
 const WHATSAPP_NUMBER = "256705265713";
 const PHONE_NUMBER = "256707265713";
@@ -74,7 +75,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
         <div>
           <p className="flex items-center gap-2 text-base font-semibold">
-            <span aria-hidden>💧</span> WaterPoint Board Uganda
+            <BrandMark className="h-4 w-4 text-[var(--wb-water-500)]" /> WaterPoint Board Uganda
           </p>
           <p className="mt-3 max-w-xs text-black/60 dark:text-white/60">
             Community water-point status and maintenance tracking — built for adoption by local

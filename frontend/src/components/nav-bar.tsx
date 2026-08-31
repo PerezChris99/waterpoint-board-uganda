@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 
 export async function NavBar({
   session,
@@ -18,7 +19,7 @@ export async function NavBar({
         className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6"
       >
         <Link href="/" className="flex min-w-0 shrink items-center gap-1.5 font-semibold tracking-tight sm:gap-2">
-          <span aria-hidden className="shrink-0 text-lg">💧</span>
+          <BrandMark className="h-5 w-5 shrink-0 text-[var(--wb-water-500)]" />
           <span className="truncate">
             <span className="sm:hidden">WaterPoint</span>
             <span className="hidden sm:inline">WaterPoint Board Uganda</span>

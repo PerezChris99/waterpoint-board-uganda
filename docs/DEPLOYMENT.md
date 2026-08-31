@@ -35,7 +35,7 @@ npm run db:seed
 
 This creates all tables and loads the fixed, deterministic demo dataset (see
 [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)). The seed script is idempotent — re-running it always
-resets to the same ~62 water points, 24 users, and historical reports/maintenance logs.
+resets to the same 153 water points, 24 users, and historical reports/maintenance logs.
 
 ### 4. Deploy
 
