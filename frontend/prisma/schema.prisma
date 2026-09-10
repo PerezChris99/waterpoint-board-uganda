@@ -34,6 +34,16 @@ enum WaterPointStatus {
   NEEDS_VERIFICATION
 }
 
+// How a WaterPoint's current status/data was last verified (data provenance, not a quality certification).
+enum VerificationMethod {
+  FIELD_VISIT
+  COMMUNITY_REPORT
+  DISTRICT_SURVEY
+  CARETAKER_UPDATE
+  ADMIN_OVERRIDE
+  SELF_REPORTED
+}
+
 enum ReportIssueType {
   NO_WATER
   LOW_PRESSURE
@@ -52,50 +62,57 @@ enum ReportStatus {
 }
 
 model User {
-  id              String           @id @default(cuid())
-  name            String
-  email           String           @unique
-  passwordHash    String
-  role            Role             @default(MEMBER)
-  village         String?
+  id                  String           @id @default(cuid())
+  name                String
+  email               String           @unique
+  passwordHash        String
+  role                Role             @default(MEMBER)
+  village             String?
   // Bumped on logout and on role changes so a previously-issued JWT (which embeds the value at
   // sign time) is rejected by requireRole() even though the token itself hasn't expired yet.
-  tokenVersion    Int              @default(0)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  reports         Report[]         @relation("ReporterReports")
-  caretakerOf     WaterPoint[]     @relation("Caretaker")
-  maintenanceLogs MaintenanceLog[]
-  auditLogs       AuditLog[]
+  tokenVersion        Int              @default(0)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  reports             Report[]         @relation("ReporterReports")
+  caretakerOf         WaterPoint[]     @relation("Caretaker")
+  verifiedWaterPoints WaterPoint[]     @relation("Verifier")
+  maintenanceLogs     MaintenanceLog[]
+  auditLogs           AuditLog[]
 
   @@index([role])
 }
 
 model WaterPoint {
-  id              String           @id @default(cuid())
-  code            String           @unique
-  name            String
-  type            WaterPointType
-  village         String
-  parish          String
-  subCounty       String
-  latitude        Float
-  longitude       Float
-  status          WaterPointStatus @default(NEEDS_VERIFICATION)
-  installedYear   Int?
-  source          String
-  description     String?
-  lastVerifiedAt  DateTime?
-  caretakerId     String?
-  caretaker       User?            @relation("Caretaker", fields: [caretakerId], references: [id])
-  reports         Report[]
-  maintenanceLogs MaintenanceLog[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                 String              @id @default(cuid())
+  code               String              @unique
+  name               String
+  type               WaterPointType
+  village            String
+  parish             String
+  subCounty          String
+  latitude           Float
+  longitude          Float
+  status             WaterPointStatus    @default(NEEDS_VERIFICATION)
+  installedYear      Int?
+  source             String
+  description        String?
+  lastVerifiedAt     DateTime?
+  // Data provenance: how/by whom the current status was last confirmed. Never a water-quality
+  // certification — see docs/DATA-METHODOLOGY.md.
+  verificationMethod VerificationMethod?
+  verifiedById       String?
+  verifiedBy         User?               @relation("Verifier", fields: [verifiedById], references: [id])
+  caretakerId        String?
+  caretaker          User?               @relation("Caretaker", fields: [caretakerId], references: [id])
+  reports            Report[]
+  maintenanceLogs    MaintenanceLog[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   @@index([status])
   @@index([village])
   @@index([caretakerId])
+  @@index([verifiedById])
   @@index([type])
 }
 

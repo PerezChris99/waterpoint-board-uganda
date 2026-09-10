@@ -219,6 +219,18 @@ stays linear.
   - No schema or application code changed in this phase — it is intentionally research/positioning
     only, so that Phases 19+ (data provenance fields, org/tenancy model, moderation, reach) build
     against validated requirements instead of assumptions.
+- [x] **Phase 19 — Data provenance fields (roadmap "Phase 1a")**
+  - Added a `VerificationMethod` enum (`FIELD_VISIT`, `DISTRICT_SURVEY`, `CARETAKER_UPDATE`,
+    `COMMUNITY_REPORT`, `ADMIN_OVERRIDE`, `SELF_REPORTED`) and `verificationMethod`/`verifiedById`
+    fields on `WaterPoint` (nullable — additive, non-breaking schema change).
+  - `PATCH /api/water-points/[id]` now records who confirmed a status change and how
+    (`CARETAKER_UPDATE` vs `ADMIN_OVERRIDE`) every time status is updated, alongside the existing
+    `lastVerifiedAt` timestamp.
+  - Public water point detail page and the admin CSV export both surface the new provenance
+    fields. Seed data populates them deterministically (points still `NEEDS_VERIFICATION` stay
+    unverified/null, matching existing `lastVerifiedAt` behavior).
+  - Framed explicitly as data provenance, not a quality certification — `docs/DATA-METHODOLOGY.md`
+    updated with a "Data provenance" section.
 
 ## Required checks before merging a feature branch into `perez`
 
