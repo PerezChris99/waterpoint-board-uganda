@@ -28,8 +28,8 @@ export async function GET() {
     }),
     prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
     prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
-    prisma.report.groupBy({ by: ["issueType"], _count: true }),
-    prisma.report.findMany({ select: { createdAt: true } }),
+    prisma.report.groupBy({ by: ["issueType"], _count: true, where: { moderationStatus: "APPROVED" } }),
+    prisma.report.findMany({ where: { moderationStatus: "APPROVED" }, select: { createdAt: true } }),
     prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
   ]);
 

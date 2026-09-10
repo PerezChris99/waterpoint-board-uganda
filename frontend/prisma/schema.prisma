@@ -83,6 +83,15 @@ enum ReportStatus {
   DISMISSED
 }
 
+// Anonymous report submissions start PENDING_REVIEW and are hidden from public-facing surfaces
+// (the water point detail page, public insights) until a caretaker/admin approves or rejects
+// them. Authenticated submissions are auto-approved (the account is already a known identity).
+enum ModerationStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                  String           @id @default(cuid())
   name                String
@@ -148,21 +157,23 @@ model WaterPoint {
 }
 
 model Report {
-  id              String          @id @default(cuid())
-  waterPointId    String
-  waterPoint      WaterPoint      @relation(fields: [waterPointId], references: [id], onDelete: Cascade)
-  reporterId      String?
-  reporter        User?           @relation("ReporterReports", fields: [reporterId], references: [id])
-  reporterName    String?
-  issueType       ReportIssueType
-  description     String
-  status          ReportStatus    @default(OPEN)
-  resolutionNotes String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id               String           @id @default(cuid())
+  waterPointId     String
+  waterPoint       WaterPoint       @relation(fields: [waterPointId], references: [id], onDelete: Cascade)
+  reporterId       String?
+  reporter         User?            @relation("ReporterReports", fields: [reporterId], references: [id])
+  reporterName     String?
+  issueType        ReportIssueType
+  description      String
+  status           ReportStatus     @default(OPEN)
+  moderationStatus ModerationStatus @default(APPROVED)
+  resolutionNotes  String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   @@index([waterPointId])
   @@index([status])
+  @@index([moderationStatus])
   @@index([createdAt])
 }
 

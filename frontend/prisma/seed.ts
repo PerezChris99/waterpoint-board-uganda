@@ -9,7 +9,7 @@
  *
  * All data is fictional. See docs/DATA-METHODOLOGY.md.
  */
-import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus, type VerificationMethod, type OrganizationType } from "@prisma/client";
+import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus, type VerificationMethod, type OrganizationType, type ModerationStatus } from "@prisma/client";
 import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
@@ -312,6 +312,11 @@ async function main() {
       ]);
       const anonymous = rng() < 0.3;
       const reporter = anonymous ? null : pick(members);
+      // A handful of recent anonymous OPEN reports are left PENDING_REVIEW to demonstrate the
+      // moderation queue (see docs/DATA-METHODOLOGY.md); everything else is treated as already
+      // moderated/approved, matching how a real deployment settles over time.
+      const moderationStatus: ModerationStatus =
+        anonymous && status === "OPEN" && rng() < 0.4 ? "PENDING_REVIEW" : "APPROVED";
       await prisma.report.create({
         data: {
           waterPointId: wp.id,
@@ -320,6 +325,7 @@ async function main() {
           issueType,
           description: pick(ISSUE_DESCRIPTIONS[issueType]),
           status,
+          moderationStatus,
           resolutionNotes:
             status === "RESOLVED" ? "Caretaker inspected and resolved the issue." : null,
           createdAt: daysAgo(randInt(1, 730)),

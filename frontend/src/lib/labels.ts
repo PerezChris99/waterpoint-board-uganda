@@ -5,6 +5,7 @@ import type {
   ReportStatus,
   Role,
   VerificationMethod,
+  ModerationStatus,
 } from "@prisma/client";
 
 export const STATUS_LABELS: Record<WaterPointStatus, string> = {
@@ -46,6 +47,13 @@ export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
   IN_PROGRESS: "In progress",
   RESOLVED: "Resolved",
   DISMISSED: "Dismissed",
+};
+
+// Moderation of anonymous report submissions — separate from operational ReportStatus above.
+export const MODERATION_STATUS_LABELS: Record<ModerationStatus, string> = {
+  PENDING_REVIEW: "Pending review",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {

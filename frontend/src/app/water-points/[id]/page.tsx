@@ -13,7 +13,11 @@ async function getWaterPoint(id: string) {
     include: {
       caretaker: { select: { name: true } },
       verifiedBy: { select: { name: true, role: true } },
-      reports: { orderBy: { createdAt: "desc" }, take: 10 },
+      reports: {
+        where: { moderationStatus: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      },
       maintenanceLogs: {
         orderBy: { createdAt: "desc" },
         take: 10,
