@@ -235,6 +235,9 @@ async function main() {
           passwordHash: caretakerPassword,
           role: "CARETAKER" as Role,
           village: pick(ALL_VILLAGES),
+          // Fictional demo phone number (Uganda +256 format) so SMS notifications (Phase 23)
+          // have a realistic target to demonstrate against.
+          phone: `+2567${String(10000000 + i).slice(-8)}`,
         },
       }),
     );

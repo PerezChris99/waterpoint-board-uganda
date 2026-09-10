@@ -280,6 +280,20 @@ stays linear.
     if the secret is unset or wrong) that emails each caretaker a summary of their currently
     escalated reports. Wired to Vercel Cron via `frontend/vercel.json` (daily at 06:00 UTC).
     Documented in `docs/DEPLOYMENT.md` along with the new optional env vars in `.env.example`.
+- [x] **Phase 23 — SMS + USSD (roadmap "Phase 3a")**
+  - Added `phone String?` to `User` (additive, nullable) so caretakers can optionally receive SMS
+    in addition to email; seed data gives each demo caretaker a fictional Uganda-format number.
+  - Added `src/lib/sms.ts`: a provider-agnostic `sendSms()` calling Africa's Talking's HTTP API
+    directly (no new dependency) when `AFRICAS_TALKING_API_KEY`/`AFRICAS_TALKING_USERNAME` are
+    set, and otherwise safely logging and no-oping — same pattern as `sendNotification()`. Wired
+    into both `POST /api/reports` (new-report alert) and the escalation cron digest.
+  - Added `POST /api/ussd`: a feature-phone-accessible USSD flow (Africa's Talking webhook
+    contract — no internet/app required) letting anyone dial in, report an issue against a water
+    point by its code, or check its current status. USSD-submitted reports enter the same
+    `PENDING_REVIEW` moderation queue as anonymous web reports (a phone number alone isn't a
+    verified account). Pure menu-building/parsing logic lives in `src/lib/ussd.ts` and is unit
+    tested (`ussd.test.ts`) independently of the DB-backed route handler.
+  - Documented setup (Africa's Talking USSD channel + env vars) in `docs/DEPLOYMENT.md`.
 
 ## Required checks before merging a feature branch into `perez`
 

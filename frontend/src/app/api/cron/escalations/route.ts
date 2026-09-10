@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isEscalated } from "@/lib/escalation";
 import { sendNotification } from "@/lib/notifications";
+import { sendSms } from "@/lib/sms";
 import { ISSUE_LABELS } from "@/lib/labels";
 
 /**
@@ -14,10 +15,10 @@ import { ISSUE_LABELS } from "@/lib/labels";
  * safe default-deny rather than an open endpoint.
  *
  * For every water point with at least one escalated report (OPEN/ACKNOWLEDGED for longer than
- * ESCALATION_THRESHOLD_DAYS — see src/lib/escalation.ts), emails the assigned caretaker a single
- * digest. Notification delivery goes through sendNotification(), which safely no-ops if no email
- * provider is configured (see src/lib/notifications.ts) — so running this cron with no provider
- * configured is harmless and just logs what it would have sent.
+ * ESCALATION_THRESHOLD_DAYS — see src/lib/escalation.ts), emails and (if a phone is on file)
+ * texts the assigned caretaker a single digest. Delivery goes through sendNotification()/sendSms(),
+ * which safely no-op if no provider is configured — so running this cron unconfigured is
+ * harmless and just logs what it would have sent.
  */
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -28,31 +29,45 @@ export async function GET(request: Request) {
 
   const candidates = await prisma.report.findMany({
     where: { status: { in: ["OPEN", "ACKNOWLEDGED"] } },
-    include: { waterPoint: { include: { caretaker: { select: { email: true, name: true } } } } },
+    include: {
+      waterPoint: { include: { caretaker: { select: { id: true, email: true, phone: true } } } },
+    },
   });
   const escalated = candidates.filter(isEscalated);
 
-  const byCaretaker = new Map<string, { email: string; items: typeof escalated }>();
+  const byCaretaker = new Map<
+    string,
+    { email: string; phone: string | null; items: typeof escalated }
+  >();
   for (const report of escalated) {
     const caretaker = report.waterPoint.caretaker;
     if (!caretaker?.email) continue;
-    const entry = byCaretaker.get(caretaker.email) ?? { email: caretaker.email, items: [] };
+    const entry =
+      byCaretaker.get(caretaker.id) ?? { email: caretaker.email, phone: caretaker.phone, items: [] };
     entry.items.push(report);
-    byCaretaker.set(caretaker.email, entry);
+    byCaretaker.set(caretaker.id, entry);
   }
 
   let notified = 0;
-  for (const { email, items } of byCaretaker.values()) {
+  for (const { email, phone, items } of byCaretaker.values()) {
     const lines = items.map(
       (r) => `- ${r.waterPoint.name}: ${ISSUE_LABELS[r.issueType]} (open since ${r.createdAt.toDateString()})`,
     );
+    const count = items.length;
     const result = await sendNotification({
       to: email,
-      subject: `${items.length} report${items.length === 1 ? "" : "s"} need attention`,
+      subject: `${count} report${count === 1 ? "" : "s"} need attention`,
       body: `The following reports have been unresolved for an extended period:\n\n${lines.join("\n")}\n\nPlease review them in your dashboard.`,
     });
     if (result.sent) notified++;
+    if (phone) {
+      await sendSms({
+        to: phone,
+        message: `WaterPoint Board: ${count} report${count === 1 ? "" : "s"} unresolved for over 2 weeks. Check your dashboard.`,
+      });
+    }
   }
 
   return NextResponse.json({ escalatedReports: escalated.length, caretakersNotified: notified });
 }
+

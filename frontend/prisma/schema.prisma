@@ -99,6 +99,9 @@ model User {
   passwordHash        String
   role                Role             @default(MEMBER)
   village             String?
+  // E.164-ish phone number for SMS notifications (Phase 23) — optional since not every account
+  // has one, and email remains the primary notification channel.
+  phone               String?
   // Bumped on logout and on role changes so a previously-issued JWT (which embeds the value at
   // sign time) is rejected by requireRole() even though the token itself hasn't expired yet.
   tokenVersion        Int              @default(0)
