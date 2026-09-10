@@ -5,6 +5,7 @@ import { NavBar } from "@/components/nav-bar";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import { BottomNav } from "@/components/bottom-nav";
+import { LocaleProvider } from "@/components/locale-provider";
 import { getSession } from "@/lib/session";
 
 const geistSans = Geist({
@@ -49,13 +50,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col pb-16 sm:pb-0">
-        <NavBar session={session} />
-        <div id="main-content" className="flex-1">
-          {children}
-        </div>
-        <Footer />
-        <BackToTop />
-        <BottomNav session={session} />
+        <LocaleProvider>
+          <NavBar session={session} />
+          <div id="main-content" className="flex-1">
+            {children}
+          </div>
+          <Footer />
+          <BackToTop />
+          <BottomNav session={session} />
+        </LocaleProvider>
       </body>
     </html>
   );

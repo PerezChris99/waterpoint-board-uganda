@@ -40,6 +40,13 @@ This is **provenance metadata, not a quality guarantee** — "field visit" means
 that they visited, not that the platform independently verified it. See "What this platform does
 not do" below.
 
+## Language
+
+The public reporting form is available in English and Luganda (a language toggle appears on the
+form itself). The Luganda translations are a good-faith starting point for demonstration purposes
+and have **not been reviewed by a native speaker** — anyone deploying this for real use in Uganda
+should have the translations checked before relying on them.
+
 ## Moderation of anonymous reports
 
 Anyone can report an issue on a water point without creating an account. To reduce the risk of
