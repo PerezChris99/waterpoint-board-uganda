@@ -100,9 +100,8 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Public instance</h2>
           <p className="mt-2">
-            This platform is production-ready software. The publicly hosted instance currently runs
-            on a placeholder demonstration water-point dataset while real, verified data is
-            onboarded — see{" "}
+            This platform is production-ready software, and its water point data is real —
+            imported from the open Water Point Data Exchange (WPDx) — see{" "}
             <a href="/data-methodology" className="underline">
               data methodology
             </a>

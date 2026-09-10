@@ -64,6 +64,9 @@ enum VerificationMethod {
   CARETAKER_UPDATE
   ADMIN_OVERRIDE
   SELF_REPORTED
+  // Bulk-imported from a third-party open dataset (e.g. the Water Point Data Exchange) rather
+  // than collected directly by this platform or its users.
+  EXTERNAL_DATASET
 }
 
 enum ReportIssueType {

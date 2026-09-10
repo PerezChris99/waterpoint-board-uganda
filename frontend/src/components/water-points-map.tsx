@@ -169,12 +169,45 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
             geometry: { type: "Point", coordinates: [wp.longitude, wp.latitude] },
           })),
         } as never,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50,
+      });
+
+      // Below clusterMaxZoom, nearby points are grouped into a single circle sized/labelled by
+      // count — at country scale this is the difference between a readable map and a solid mass
+      // of thousands of overlapping dots.
+      map.addLayer({
+        id: "water-points-clusters",
+        type: "circle",
+        source: "water-points",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": TONE_COLORS.info,
+          "circle-radius": ["step", ["get", "point_count"], 14, 50, 18, 500, 24, 5000, 32],
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+
+      map.addLayer({
+        id: "water-points-cluster-count",
+        type: "symbol",
+        source: "water-points",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-font": ["Noto Sans Bold"],
+          "text-size": 12,
+        },
+        paint: { "text-color": "#ffffff" },
       });
 
       map.addLayer({
         id: "water-points-circle",
         type: "circle",
         source: "water-points",
+        filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-radius": 8,
           "circle-color": [
@@ -191,6 +224,22 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
           "circle-stroke-width": 2,
           "circle-stroke-color": "#ffffff",
         },
+      });
+
+      map.on("click", "water-points-clusters", async (e) => {
+        const feature = e.features?.[0];
+        if (!feature) return;
+        const clusterId = (feature.properties as { cluster_id: number }).cluster_id;
+        const source = map.getSource("water-points") as GeoJSONSource;
+        const zoom = await source.getClusterExpansionZoom(clusterId);
+        const coords = (feature.geometry as unknown as { coordinates: [number, number] }).coordinates;
+        map.easeTo({ center: coords, zoom });
+      });
+      map.on("mouseenter", "water-points-clusters", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "water-points-clusters", () => {
+        map.getCanvas().style.cursor = "";
       });
 
       if (waterPoints.length > 0) {

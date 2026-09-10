@@ -70,4 +70,5 @@ export const VERIFICATION_METHOD_LABELS: Record<VerificationMethod, string> = {
   CARETAKER_UPDATE: "Caretaker update",
   ADMIN_OVERRIDE: "Admin override",
   SELF_REPORTED: "Self-reported",
+  EXTERNAL_DATASET: "Imported dataset",
 };

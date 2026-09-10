@@ -129,7 +129,7 @@ export function Footer() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-xs text-black/50 sm:flex-row sm:px-6 dark:text-white/50">
           <p>
             &copy; {new Date().getFullYear()} WaterPoint Board Uganda. All rights reserved. Water
-            point data shown is a placeholder demonstration dataset — see{" "}
+            point data is imported from the open Water Point Data Exchange — see{" "}
             <Link href="/data-methodology" className="underline">
               data methodology
             </Link>
