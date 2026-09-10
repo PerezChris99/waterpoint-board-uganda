@@ -231,6 +231,25 @@ stays linear.
     unverified/null, matching existing `lastVerifiedAt` behavior).
   - Framed explicitly as data provenance, not a quality certification — `docs/DATA-METHODOLOGY.md`
     updated with a "Data provenance" section.
+- [x] **Phase 20 — Organization/tenancy model (roadmap "Phase 1b")**
+  - Added an `Organization` model (`name`, `type` — district local government / NWSC rural unit /
+    NGO / other — `contactEmail`) and a nullable `organizationId` FK on both `User` and
+    `WaterPoint` (additive, non-breaking schema change). No existing seed data was reassigned —
+    an `organizationId === null` user/water point is treated as platform-wide/demo data.
+  - `getVerifiedSession()` now re-reads `organizationId` fresh from the database on every request
+    (same pattern already used for `role`/`tokenVersion`), so a real org reassignment takes effect
+    immediately without forcing re-login. Added `organizationScopeWhere()` in `src/lib/rbac.ts`:
+    an ADMIN/CARETAKER with no organization is a platform-wide super-admin (sees everything); one
+    assigned to an organization is scoped to only that organization's data.
+  - Applied this scoping to every admin-facing read/write surface: `/api/admin/users` (list +
+    role-update, both list and update now 404/403 across org boundaries), `/api/water-points/[id]`
+    PATCH (an org-scoped admin can't update another org's water point), `/api/analytics/summary`,
+    `/api/analytics/export`, and the equivalent server-rendered admin dashboard pages
+    (`/dashboard/admin/users`, `/dashboard/admin/analytics`). Public read routes (the directory,
+    map, and water point detail pages) are intentionally untouched — this platform's public
+    transparency board still shows all data regardless of organization.
+  - Seed data adds 3 sample Organizations to prove the model end-to-end without disturbing the
+    existing deterministic dataset.
 
 ## Required checks before merging a feature branch into `perez`
 

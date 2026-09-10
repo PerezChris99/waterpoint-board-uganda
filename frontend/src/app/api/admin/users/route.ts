@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireRole, apiErrorResponse } from "@/lib/rbac";
+import { requireRole, apiErrorResponse, organizationScopeWhere } from "@/lib/rbac";
 
 export async function GET() {
   try {
-    await requireRole("ADMIN");
+    const session = await requireRole("ADMIN");
     const users = await prisma.user.findMany({
+      where: organizationScopeWhere(session),
       orderBy: { createdAt: "asc" },
       select: {
         id: true,
@@ -13,6 +14,7 @@ export async function GET() {
         email: true,
         role: true,
         village: true,
+        organizationId: true,
         createdAt: true,
         _count: { select: { caretakerOf: true, reports: true } },
       },
