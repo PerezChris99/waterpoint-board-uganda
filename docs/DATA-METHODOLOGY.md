@@ -83,16 +83,16 @@ same dataset — nothing is randomized between runs, and the application itself 
 core water-point list. Only new reports, maintenance logs, and user registrations grow through
 normal use; the seed script is the only thing that resets the baseline.
 
-### Demo accounts (seeded, for demonstration only)
+### Login credentials
 
-| Role      | Email                                | Password          |
-| --------- | ------------------------------------- | ------------------ |
-| Admin     | `admin@waterpointboard.example`       | `Admin#2026Secure`  |
-| Caretaker | `caretaker1@waterpointboard.example`  | `Caretaker#2026`    |
-| Member    | `member1@waterpointboard.example`     | `Member#2026`       |
-
-These credentials are intentionally public — this is a portfolio demo, not a production system
-with real user data.
+There are no public demo credentials. The seed script (`frontend/prisma/seed.ts`) refuses to run
+unless `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` are set in the operator's own untracked `.env` (see
+`.env.example`) — only the person who runs the seed knows the admin login. Optional
+`SEED_CARETAKER_*`/`SEED_MEMBER_*` env vars give that same operator one working caretaker and
+member login too. Every other seeded caretaker/member account exists only to attribute the
+placeholder water points/reports/maintenance logs to *someone* — each gets a random, undisclosed
+password generated at seed time, and nobody is meant to log into them. Real deployments should
+register real users through the normal sign-up flow instead of relying on seeded accounts at all.
 
 ## What this platform does not do
 

@@ -331,6 +331,41 @@ stays linear.
   - Unit tested (`logger.test.ts`, extended `rate-limit.test.ts` covering the Upstash and
     fallback-on-failure paths); lint/typecheck/test all pass with no new dependencies added.
 
+- [x] **Phase 26 — Production incident fix: schema/DB drift on Vercel**
+  - The live Vercel deployment started failing its build with a Prisma `P2022` error
+    (`Report.moderationStatus` column missing) because the production Neon database had never
+    been synced with schema changes added in Phase 21 — `prisma migrate`/`db push` had only ever
+    been run against local/CI databases, not the real production one.
+  - Fixed by running `prisma db push` directly against the production `DATABASE_URL` to bring the
+    live schema in line with `schema.prisma`, and added a "Deploying schema changes" section to
+    `docs/DEPLOYMENT.md` documenting that any future schema change must be pushed to production
+    before/alongside deploying the code that depends on it.
+  - Added `export const dynamic = "force-dynamic"` to `/api/public/insights` and `/api/health` so
+    Next.js stops attempting to statically prerender routes that must always hit the live
+    database.
+  - Investigated a reported "lint error" in `schema.prisma` — confirmed as a false positive (no
+    real Prisma validation issue).
+- [x] **Phase 27 — Privatized credentials and "production-ready, honest placeholder data" wording pass**
+  - Removed all publicly-known demo login credentials. `prisma/seed.ts` now requires
+    `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` (throws via a new `requireEnv()` helper if unset),
+    supports optional `SEED_CARETAKER_EMAIL/PASSWORD/NAME` and `SEED_MEMBER_EMAIL/PASSWORD/NAME`
+    for one real caretaker/member login, and gives every other seeded caretaker/member account a
+    random, undisclosed password (`randomPassword()`, `crypto.randomBytes`) instead of the old
+    shared hardcoded passwords. Documented the new env vars in `.env.example`; added CI-only
+    throwaway values to `.github/workflows/ci.yml` so the seed step in CI keeps working.
+  - Removed the public "Demo accounts" autofill list from the login page, and the "create a demo
+    account" wording from the register page and home page CTA.
+  - Reworded the README, `docs/DATA-METHODOLOGY.md`, the in-app `/data-methodology` page, `/about`,
+    `/privacy`, `docs/PRIVACY.md`, `/copyright`, the footer, and site-wide SEO metadata
+    (`layout.tsx`) away from "fictional demo/portfolio project" framing and toward: the *software*
+    is production-ready, while the *public instance's water-point dataset* is honestly disclosed
+    as a placeholder demonstration dataset (153 points across real Ugandan towns/cities) pending
+    real, verified data. Also fixed several stale figures left over from the Phase 15 reseed
+    (README/`/data-methodology` still said "62 fictional water points"/"one small fictional
+    community").
+  - No schema changes. Verified with `npm run lint`, `npm run typecheck`, `npm run test`, and
+    `npm run build`, all passing.
+
 ## Required checks before merging a feature branch into `perez`
 
 - Frontend lint, TypeScript check, unit tests, production build.

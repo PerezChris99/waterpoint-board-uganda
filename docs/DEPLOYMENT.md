@@ -24,7 +24,9 @@ The whole app is one Next.js project — one Vercel project, one database, no se
 ### 3. Initialize the database schema and seed data
 
 Run once, locally, pointed at the production `DATABASE_URL` (or via `vercel env pull` +
-local run):
+local run). Also set `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` in your local `.env` first — the
+seed script refuses to run without them, so the admin login is private to you, never a
+hardcoded credential (see [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)):
 
 ```bash
 cd frontend
@@ -33,7 +35,7 @@ npx prisma db push
 npm run db:seed
 ```
 
-This creates all tables and loads the fixed, deterministic demo dataset (see
+This creates all tables and loads the fixed, deterministic placeholder dataset (see
 [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)). The seed script is idempotent — re-running it always
 resets to the same 153 water points, 24 users, and historical reports/maintenance logs.
 
@@ -46,8 +48,8 @@ Push to `main` (or click "Deploy" in the Vercel dashboard). Vercel builds with `
 
 - `https://waterpointboarduganda.vercel.app/` loads the landing page.
 - `https://waterpointboarduganda.vercel.app/water-points` lists seeded water points.
-- Log in with a demo account (see [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)) and confirm the
-  caretaker/admin dashboards load.
+- Log in with the private admin credentials you set as `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`
+  (see [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)) and confirm the caretaker/admin dashboards load.
 
 ### Deploying schema changes
 
@@ -69,7 +71,7 @@ database should generally be marked `force-dynamic` for this reason.
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local   # fill in a local/dev DATABASE_URL and JWT_SECRET
+cp .env.example .env.local   # fill in a local/dev DATABASE_URL, JWT_SECRET, and SEED_ADMIN_EMAIL/PASSWORD
 npx prisma generate
 npx prisma db push
 npm run db:seed

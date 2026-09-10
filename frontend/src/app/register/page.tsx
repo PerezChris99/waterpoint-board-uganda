@@ -37,7 +37,7 @@ export default function RegisterPage() {
   return (
     <AuthShell
       eyebrow="Join the community"
-      title="Create a demo account"
+      title="Create an account"
       subtitle="Sign up to submit reports and track the water points you care about."
     >
       <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">

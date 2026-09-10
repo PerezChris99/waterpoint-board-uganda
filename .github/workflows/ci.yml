@@ -31,6 +31,8 @@ jobs:
       DATABASE_URL: postgresql://waterpoint:waterpoint@localhost:5432/waterpoint_test
       JWT_SECRET: ci-only-secret-not-used-in-production-32chars
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      SEED_ADMIN_EMAIL: ci-admin@waterpointboard.example
+      SEED_ADMIN_PASSWORD: ci-only-seed-password-not-real-32chars
     steps:
       - uses: actions/checkout@v4
 
