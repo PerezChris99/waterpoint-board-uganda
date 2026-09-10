@@ -294,6 +294,19 @@ stays linear.
     verified account). Pure menu-building/parsing logic lives in `src/lib/ussd.ts` and is unit
     tested (`ussd.test.ts`) independently of the DB-backed route handler.
   - Documented setup (Africa's Talking USSD channel + env vars) in `docs/DEPLOYMENT.md`.
+- [x] **Phase 24 — Localization: Luganda for the public reporting flow (roadmap "Phase 3b")**
+  - Added a minimal, dependency-free localization layer scoped to the public reporting flow (per
+    the roadmap, not a full site-wide i18n framework — no existing i18n library, no routing
+    changes): `src/lib/i18n.ts` (English/Luganda string dictionary), `src/components/
+    locale-provider.tsx` (a small React Context persisting the choice to `localStorage`, restored
+    after mount to avoid an SSR/CSR hydration mismatch).
+  - `ReportForm` (the report-an-issue form on every water point detail page) now renders in the
+    selected language, with an inline English/Luganda toggle, including issue-type options,
+    field labels, and success/error messages.
+  - The Luganda text is a good-faith starting translation, explicitly flagged in code comments
+    and `docs/DATA-METHODOLOGY.md` as NOT reviewed by a native speaker — a real deployment should
+    have it checked before relying on it.
+  - Unit tested (`i18n.test.ts`); lint/typecheck/test all pass with no new dependencies added.
 
 ## Required checks before merging a feature branch into `perez`
 
