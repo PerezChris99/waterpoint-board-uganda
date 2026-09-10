@@ -6,6 +6,7 @@ import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { requireRole, apiErrorResponse, organizationScopeWhere } from "@/lib/rbac";
 import { sendNotification } from "@/lib/notifications";
+import { sendSms } from "@/lib/sms";
 import { ISSUE_LABELS } from "@/lib/labels";
 
 export async function GET(request: Request) {
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
 
   const waterPoint = await prisma.waterPoint.findUnique({
     where: { id: parsed.data.waterPointId },
-    include: { caretaker: { select: { email: true, name: true } } },
+    include: { caretaker: { select: { email: true, name: true, phone: true } } },
   });
   if (!waterPoint) {
     return NextResponse.json({ error: { message: "Water point not found" } }, { status: 404 });
@@ -89,6 +90,12 @@ export async function POST(request: Request) {
       to: waterPoint.caretaker.email,
       subject: `New report: ${waterPoint.name}`,
       body: `${ISSUE_LABELS[parsed.data.issueType]} reported at ${waterPoint.name}.\n\n${parsed.data.description}\n\nView it in your dashboard to acknowledge or resolve.`,
+    }).catch(() => {});
+  }
+  if (waterPoint.caretaker?.phone) {
+    void sendSms({
+      to: waterPoint.caretaker.phone,
+      message: `New report at ${waterPoint.name}: ${ISSUE_LABELS[parsed.data.issueType]}. Check your dashboard.`,
     }).catch(() => {});
   }
 

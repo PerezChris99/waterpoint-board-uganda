@@ -94,3 +94,21 @@ itself to work. To also get a daily email digest sent to affected caretakers:
 New report submissions also try to notify the assigned caretaker immediately via the same
 `sendNotification()` path (best-effort — a failed/unconfigured notification never blocks the
 report itself from being saved).
+
+## SMS + USSD (optional)
+
+Not every caretaker has reliable internet access; SMS and USSD (feature-phone menus, no app or
+data connection required) are how most rural water-point workflows in Uganda actually operate
+today — see `docs/NWSC-PRODUCTION-STRATEGY.md`.
+
+- Set `AFRICAS_TALKING_API_KEY` and `AFRICAS_TALKING_USERNAME` (and optionally
+  `AFRICAS_TALKING_SENDER_ID`) so `sendSms()` (`src/lib/sms.ts`) sends real texts via
+  [Africa's Talking](https://africastalking.com) instead of just logging. New reports and the
+  escalation digest both text the assigned caretaker if their account has a `phone` on file, in
+  addition to email.
+- `POST /api/ussd` implements Africa's Talking's USSD webhook contract: dial in, choose "1" to
+  report an issue or "2" to check a water point's status by its code (e.g. `WP-001`), no
+  internet/app required. To wire it up, create a USSD service in the Africa's Talking dashboard
+  and set its callback URL to `https://<your-domain>/api/ussd`. Reports submitted via USSD enter
+  the same `PENDING_REVIEW` moderation queue as anonymous web reports, since a phone number alone
+  isn't a verified account.
