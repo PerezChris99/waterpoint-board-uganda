@@ -49,6 +49,21 @@ Push to `main` (or click "Deploy" in the Vercel dashboard). Vercel builds with `
 - Log in with a demo account (see [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)) and confirm the
   caretaker/admin dashboards load.
 
+### Deploying schema changes
+
+Because this project uses `prisma db push` instead of migrations (see the rationale in
+`prisma/schema.prisma`'s header comment), a `git push` to `main` alone does **not** update the
+production database — `npm run postinstall` only runs `prisma generate` (regenerates the client
+to match the schema file), it never touches the live database. After any change to
+`prisma/schema.prisma`, run `npx prisma db push` against the production `DATABASE_URL` (locally,
+or via `vercel env pull`) **before or immediately after** deploying. Forgetting this step doesn't
+just cause runtime errors — any API route that queries the DB with no `export const dynamic =
+"force-dynamic"` is prerendered by Next.js at build time, so a schema/DB mismatch can fail the
+Vercel build itself (a real incident: `Report.moderationStatus` was added in schema but never
+pushed to production, and `/api/public/insights`'s build-time prerender crashed the whole
+deploy with a Prisma `P2022` error). Public, unauthenticated GET routes that read from the
+database should generally be marked `force-dynamic` for this reason.
+
 ## Local development
 
 ```bash
