@@ -1,17 +1,57 @@
 # Data Methodology
 
-> This document describes the current demo/seed dataset. For the plan to move toward real data
-> and a real institutional pilot, see [docs/NWSC-PRODUCTION-STRATEGY.md](NWSC-PRODUCTION-STRATEGY.md).
+> The public instance now runs on real, imported water point data (see "Real water point data"
+> below). Local development and CI still use a fictional, deterministic seed fixture for testing
+> — see "Development/test seed data" below for that distinction. For the wider production roadmap,
+> see [docs/NWSC-PRODUCTION-STRATEGY.md](NWSC-PRODUCTION-STRATEGY.md).
 
 ## What this platform shows
 
-WaterPoint Board Uganda displays **community-reported** operational information about water
-points at fictional demonstration sites spread across real towns and cities nationwide. Every
-status shown is a report, not a guarantee:
+WaterPoint Board Uganda displays **community-reported** operational information about real water
+points nationwide. Every status shown is a report, not a guarantee:
 
 > "Reported available on 28 August 2026."
 
 We deliberately avoid absolute claims such as "This water is safe."
+
+## Real water point data
+
+The public instance's ~98,700 water points are imported from the **Water Point Data Exchange**
+(WPDx, [waterpointdata.org](https://www.waterpointdata.org/)) — a free, open aggregator of
+field-collected water point data used by governments and NGOs across the water sector. Uganda's
+records in WPDx come from Uganda's own Ministry of Water and Environment (a 2009 nationwide
+census) plus later surveys by Water For People, The Water Trust, IRC, World Vision,
+YouthMappers, and other WASH-sector organizations, spanning 2005–2025. Used here in line with
+WPDx's open-data access terms (freely explorable/downloadable at
+[waterpointdata.org/access-data](https://www.waterpointdata.org/access-data/)).
+
+Coordinates, water point technology (borehole, protected well, spring, tap stand, rainwater
+tank), and administrative location (district/sub-county/parish) are carried over as reported.
+**Functionality status is treated differently depending on age**, in keeping with this project's
+honesty-first data policy:
+
+- If a water point's most recent WPDx field report is from **2016 or later**, its reported
+  functional/non-functional status is carried over, tagged `verificationMethod =
+  EXTERNAL_DATASET` and `lastVerifiedAt` set to the real report date.
+- If a water point's only status evidence is **older than that** — which is true for the large
+  majority of records, since 79% of Uganda's WPDx data comes from the 2009 census — its status is
+  set to **`NEEDS_VERIFICATION`** rather than carrying forward a stale claim as if it were
+  current. A 17+ year old "functional" or "needs repair" reading is not treated as today's truth.
+
+This reuses the platform's existing data-provenance fields (see "Data provenance" below) rather
+than inventing new mechanics — an imported record is honestly one more kind of provenance,
+alongside a caretaker's own update or a community report.
+
+Re-running the import (`npm run db:import-real-water-points`) is idempotent: it re-derives the
+same water points from WPDx and only adds ones not already present by their WPDx ID.
+
+## Development/test seed data
+
+Separately from the real data above, `npm run db:seed` still populates a small, fixed,
+deterministic **fictional** dataset (153 water points, 24 users, hundreds of reports/maintenance
+logs) used only for local development and CI test runs — it is never run against the live
+deployment. Login credentials for any seeded accounts are environment-configured and private to
+the operator, not published.
 
 ## Statuses
 

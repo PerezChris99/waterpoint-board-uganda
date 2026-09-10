@@ -365,6 +365,47 @@ stays linear.
     community").
   - No schema changes. Verified with `npm run lint`, `npm run typecheck`, `npm run test`, and
     `npm run build`, all passing.
+- [x] **Phase 28 — Real water point data: nationwide WPDx import, replacing all placeholder data**
+  - Added `prisma/import-real-water-points.ts`: a re-runnable import from the **Water Point Data
+    Exchange (WPDx)**, a free, open water-point data aggregator, pulling every Uganda record
+    (98,767 raw, 98,722 valid/de-duplicated after excluding a handful of non-fixed "delivered/
+    packaged water" entries) via its public API. Ran it against production: deleted the 153
+    placeholder (`WP-###`) seed water points (cascading their fictional reports/maintenance logs)
+    and inserted 98,722 real water points with real coordinates, technology type, and district/
+    sub-county/parish, sourced from Uganda's Ministry of Water and Environment (2009 census) and
+    later NGO surveys (Water For People, The Water Trust, IRC, World Vision, YouthMappers, etc.,
+    2012\u20132025).
+  - Added `VerificationMethod.EXTERNAL_DATASET` (additive enum value, pushed to production) so an
+    imported record's provenance is honestly distinct from a field visit, caretaker update, or
+    community report.
+  - **Honesty policy for imported status**: 79% of Uganda's WPDx records (77,048 of 98,767) come
+    from the single 2009 census \u2014 17+ years old. Rather than presenting that census's
+    functional/non-functional reading as current fact, any water point whose only status evidence
+    predates 2016 is imported as `NEEDS_VERIFICATION` (87,358 of 98,722 landed here); only
+    recent (2016+) field reports carry their stated status forward, tagged with the real
+    `lastVerifiedAt` report date.
+  - `WaterPointsMap` (map.tsx): added MapLibre clustering (`cluster: true` on the GeoJSON source,
+    plus cluster-circle and count-label layers, click-to-zoom-into-cluster) \u2014 required for a
+    98k-point dataset to render as a readable map instead of a solid mass of overlapping dots.
+  - `/map` page: discovered and fixed a real performance problem while testing at this new scale
+    \u2014 the page's water-point query had no `take` cap and sorted alphabetically by name,
+    fetching and serializing all 98,722 rows on every request (measured: ~17s query time, ~17.8MB
+    JSON payload). Replaced with a fast `ORDER BY random() LIMIT 15000` sample (a separate cheap
+    `count()` gives the true total for the stat card), and updated the page copy to honestly say
+    "a live, nationwide-random sample of N of the M real water points" instead of implying every
+    point is always plotted. The full dataset remains completely browsable/searchable via the
+    already-paginated `/water-points` list and individual detail pages, which were unaffected.
+  - Updated `docs/DATA-METHODOLOGY.md`, the in-app `/data-methodology` page, README, `/about`,
+    `/privacy`, `docs/PRIVACY.md`, `/copyright`, and the footer to describe the real WPDx data
+    provenance (replacing the Phase 27 "placeholder dataset" language) while keeping the
+    fictional, deterministic `db:seed` script as a separate, clearly-labeled dev/CI-only fixture
+    (a new `db:import-real-water-points` script is the one that touches real data).
+  - Known follow-up (not fixed this phase): `/water-points`' village-filter dropdown queries
+    ~1,410 distinct village/parish names in ~5-6s \u2014 usable but not fast; a future pass could
+    cache this list or switch to a searchable combobox instead of a plain `<select>`.
+  - Verified with `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`, all
+    passing, plus a direct production query confirming 98,722 total water points and 0 leftover
+    placeholder (`WP-###`) rows.
 
 ## Required checks before merging a feature branch into `perez`
 

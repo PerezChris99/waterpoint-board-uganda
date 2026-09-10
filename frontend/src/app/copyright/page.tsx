@@ -72,9 +72,18 @@ export default function CopyrightPage() {
         <section>
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Data disclaimer</h2>
           <p className="mt-2">
-            Water point, report, and seeded-user data visible on the public instance is a
-            placeholder demonstration dataset pending real, verified data — only the
-            operator&apos;s own configured login is a real, private account. See our{" "}
+            Water point locations, technology, and administrative divisions are imported from the{" "}
+            <a
+              href="https://www.waterpointdata.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Water Point Data Exchange (WPDx)
+            </a>
+            , a free, open water-point data aggregator, used in accordance with its open-data
+            access terms. Report and maintenance-log data belongs to real registered users; only
+            the operator&apos;s own configured login is a real, private account. See our{" "}
             <a href="/data-methodology" className="underline">
               data methodology
             </a>{" "}

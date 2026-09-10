@@ -1,8 +1,8 @@
 # Privacy
 
-WaterPoint Board Uganda is production-ready software. The publicly hosted instance currently runs
-on a placeholder demonstration water-point dataset (see [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md))
-while real, verified data is onboarded; account holders are real people with private login
+WaterPoint Board Uganda is production-ready software. The publicly hosted instance's water-point
+data is real, imported from the open Water Point Data Exchange (see
+[DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)); account holders are real people with private login
 credentials. It is designed to collect the minimum data necessary to operate:
 
 - **Account holders:** name, email, hashed password (bcrypt), role, optional village.
@@ -12,13 +12,13 @@ credentials. It is designed to collect the minimum data necessary to operate:
   passwords, tokens, or secrets.
 
 We do not collect health data, payment data, government identifiers, or precise personal location
-data (water point coordinates are approximate, and site-level detail is currently placeholder
-data pending real verification). Administrators can review report content and manage user roles;
-there is no automated profiling or third-party data sharing.
+data — water point coordinates come from a third-party open dataset (WPDx), not from tracking any
+individual. Administrators can review report content and manage user roles; there is no automated
+profiling or third-party data sharing.
 
-Since the water-point dataset on the public instance is still placeholder/seed data, this
-document intentionally stays short — a production deployment handling real personal data at scale
-would need a fuller policy, data retention schedule, and deletion workflow.
+This document intentionally stays short for a young platform with modest account/report volume —
+a production deployment handling real personal data at greater scale would need a fuller policy,
+data retention schedule, and deletion workflow.
 
 ## Uganda's Data Protection and Privacy Act, 2019
 

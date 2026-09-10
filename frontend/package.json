@@ -19,7 +19,8 @@
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:import-real-water-points": "tsx prisma/import-real-water-points.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

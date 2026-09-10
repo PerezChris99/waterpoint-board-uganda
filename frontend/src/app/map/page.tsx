@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { TYPE_LABELS, STATUS_LABELS, ISSUE_LABELS } from "@/lib/labels";
 import { StatusPieChart, DonutChart, IssueBarChart, TrendLineChart } from "@/components/charts";
@@ -7,35 +8,47 @@ import type { WaterPointType, WaterPointStatus, ReportIssueType } from "@prisma/
 
 export const metadata: Metadata = {
   title: "Map & Insights",
-  description: "Live map of every tracked water point plus dynamic statistics on status, type, and reports.",
+  description: "Live map of real Uganda water points plus dynamic statistics on status, type, and reports.",
 };
 
 export const revalidate = 0;
+
+// The dataset (~98,700 real, WPDx-imported water points) is too large to fetch and sort in full
+// on every page load without a multi-second, multi-MB response. The map instead shows a random,
+// nationwide-representative sample of this size — clustering (see WaterPointsMap) keeps it
+// readable, and the full dataset remains browsable/searchable at /water-points.
+const MAP_SAMPLE_SIZE = 15000;
+
+interface MapSampleRow {
+  id: string;
+  name: string;
+  code: string;
+  village: string;
+  status: WaterPointStatus;
+  latitude: number;
+  longitude: number;
+}
 
 function monthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 export default async function MapInsightsPage() {
-  const [waterPoints, statusGroups, typeGroups, issueGroups, reports, villageGroups] = await Promise.all([
-    prisma.waterPoint.findMany({
-      select: {
-        id: true,
-        name: true,
-        code: true,
-        village: true,
-        status: true,
-        latitude: true,
-        longitude: true,
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
-    prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
-    prisma.report.groupBy({ by: ["issueType"], _count: true }),
-    prisma.report.findMany({ select: { createdAt: true } }),
-    prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
-  ]);
+  const [waterPoints, totalWaterPoints, statusGroups, typeGroups, issueGroups, reports, villageGroups] =
+    await Promise.all([
+      prisma.$queryRaw<MapSampleRow[]>`
+        SELECT id, name, code, village, status, latitude, longitude
+        FROM "WaterPoint"
+        ORDER BY random()
+        LIMIT ${MAP_SAMPLE_SIZE};
+      `,
+      prisma.waterPoint.count(),
+      prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
+      prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
+      prisma.report.groupBy({ by: ["issueType"], _count: true }),
+      prisma.report.findMany({ select: { createdAt: true } }),
+      prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
+    ]);
 
   const monthly = new Map<string, number>();
   for (const report of reports) {
@@ -70,8 +83,15 @@ export default async function MapInsightsPage() {
         <p className="text-sm font-medium tracking-wide text-[var(--wb-water-500)] uppercase">Live data</p>
         <h1 className="mt-1 text-2xl font-semibold sm:text-3xl">Map &amp; Insights</h1>
         <p className="mt-2 text-sm text-black/60 dark:text-white/60">
-          Every tracked water point plotted on the map below, with statistics computed live from the
-          same database — no cached or hand-written numbers.
+          {waterPoints.length < totalWaterPoints
+            ? `A live, nationwide-random sample of ${waterPoints.length.toLocaleString()} of the
+               ${totalWaterPoints.toLocaleString()} real water points we track — statistics below
+               cover all of them. Browse or search the full list at`
+            : "Every tracked water point plotted below, with statistics computed live from the same database. Browse or search the full list at"}{" "}
+          <Link href="/water-points" className="underline">
+            /water-points
+          </Link>
+          .
         </p>
       </div>
 
@@ -81,7 +101,7 @@ export default async function MapInsightsPage() {
 
       <div className="mt-6 grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
         {[
-          { label: "Water points", value: waterPoints.length },
+          { label: "Water points", value: totalWaterPoints },
           { label: "Villages", value: villageGroups.length },
           { label: "Community reports", value: reports.length },
           { label: "Water point types", value: typeGroups.length },

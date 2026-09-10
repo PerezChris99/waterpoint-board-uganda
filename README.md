@@ -14,9 +14,9 @@ Prisma, and PostgreSQL, deployed on Vercel.
 > National Water and Sewerage Corporation (NWSC) billing/network operations and the Ministry of
 > Water and Environment's water-point data collection. It is **not** a drinking-water
 > certification platform, a contamination-detection tool, or an official government system. The
-> publicly hosted instance currently runs on a placeholder demonstration dataset while real,
-> verified water-point data is onboarded — real deployment also requires the institutional
-> validation and data-governance steps in
+> publicly hosted instance's ~98,700 water points are real, imported from the open Water Point
+> Data Exchange — real deployment for a specific district/NGO/government body also requires the
+> institutional validation and data-governance steps in
 > [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md). See also
 > [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
@@ -50,7 +50,8 @@ towns and cities nationwide. It models a realistic end-to-end workflow:
 | 🛡️ Security | CSP + security headers, input validation on every endpoint, per-IP rate limiting, audit logging |
 | ♿ Accessibility | Skip-to-content link, semantic HTML/ARIA labeling, reduced-motion support, keyboard-navigable forms |
 | 🔎 SEO | Metadata API, sitemap/robots, OpenGraph & Twitter cards |
-| 🌱 Seed data | 153 placeholder water points, 24 users, hundreds of reports/maintenance logs — deterministic and idempotent, pending real verified data |
+| � Real water data | ~98,700 real Uganda water points imported from the open Water Point Data Exchange (WPDx), with honest status handling for older field reports |
+| 🌱 Dev/test seed data | 153 fictional water points, 24 users, hundreds of reports/maintenance logs for local dev and CI — deterministic and idempotent, never run against the live deployment |
 
 ## Tech stack
 
@@ -119,6 +120,12 @@ Then open [http://localhost:3000](http://localhost:3000). Log in with the privat
 credentials you set as `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` — see
 [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for how seeded accounts work.
 
+To populate real water point data (as run against the live deployment) instead of the fictional
+seed, run `npm run db:import-real-water-points` — it imports ~98,700 real Uganda water points
+from the open Water Point Data Exchange and removes any placeholder (`WP-###`) seed points. See
+[docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for the data provenance and honesty policy
+behind that import.
+
 ### Test commands
 
 ```bash
@@ -142,7 +149,7 @@ seeding, and verification).
 | [docs/API.md](docs/API.md) | Full Route Handler reference |
 | [docs/SECURITY.md](docs/SECURITY.md) | Auth, authorization, validation, rate limiting, known limitations |
 | [docs/PRIVACY.md](docs/PRIVACY.md) | What data is collected and why |
-| [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) | Seed data scope, demo accounts, what this platform does *not* do |
+| [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) | Real water point data provenance, dev/test seed data, what this platform does *not* do |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Vercel + Neon deployment guide |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Branch workflow, PR checklist |
 | [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) | Phase-by-phase build log |

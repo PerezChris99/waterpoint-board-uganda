@@ -97,11 +97,12 @@ export default function AboutPage() {
       <div className="mt-14 rounded-lg border border-black/10 bg-[var(--wb-surface-100)] p-5 text-sm dark:border-white/10 dark:bg-[var(--wb-surface-800)]">
         <p className="font-medium text-[var(--foreground)]">A note on the data you see here</p>
         <p className="mt-1.5 text-black/70 dark:text-white/70">
-          The platform itself is production-ready, but this public instance is currently seeded
-          with a placeholder demonstration dataset — real town/city locations nationwide, with
-          fictional site-level detail — while real, verified water point data is onboarded.
-          WaterPoint Board does not certify water quality or drinking-water safety, and does not
-          replace local water authorities. Read the full{" "}
+          The water points shown are real: imported from the Water Point Data Exchange (WPDx), an
+          open aggregator of field-collected data from Uganda&apos;s Ministry of Water and
+          Environment and WASH-sector partners. Functionality status is only shown as current for
+          recent (2016+) field reports — older readings are marked “Needs verification” rather
+          than presented as current fact. WaterPoint Board does not certify water quality or
+          drinking-water safety, and does not replace local water authorities. Read the full{" "}
           <Link href="/data-methodology" className="underline">
             data methodology
           </Link>{" "}
