@@ -112,3 +112,37 @@ today — see `docs/NWSC-PRODUCTION-STRATEGY.md`.
   and set its callback URL to `https://<your-domain>/api/ussd`. Reports submitted via USSD enter
   the same `PENDING_REVIEW` moderation queue as anonymous web reports, since a phone number alone
   isn't a verified account.
+
+## Shared rate limiting (optional)
+
+By default, rate limiting (`src/lib/rate-limit.ts`) is in-memory and scoped to a single warm
+serverless instance — good enough to blunt casual abuse, but not shared across instances under
+real multi-instance production traffic. Set `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN` (from an [Upstash](https://upstash.com) Redis database's REST API
+credentials) to switch to a shared, cross-instance limiter automatically — no code changes needed,
+and it fails open to the in-memory limiter if Upstash is temporarily unreachable.
+
+## Structured logging / error tracking (optional)
+
+`src/lib/logger.ts` emits structured JSON log lines (timestamp, level, message, context) for every
+unhandled API error, which Vercel captures from stdout/stderr automatically. To add a real error
+tracker (recommended for production): install `@sentry/nextjs` and follow its
+[Next.js setup guide](https://docs.sentry.io/platforms/javascript/guides/nextjs/) — once
+configured, Sentry auto-instruments `console.error`, so every `logger.error()` call is picked up
+without further code changes.
+
+## Data retention and backups
+
+- **Neon Postgres:** Neon retains automatic point-in-time-recovery (PITR) history for a window
+  determined by your plan (check the current retention window in the Neon dashboard before
+  relying on it). For a real deployment, additionally schedule your own periodic `pg_dump` exports
+  (e.g. a daily GitHub Actions/cron job) stored somewhere independent of Neon, and document a
+  restore procedure and who is responsible for testing it periodically.
+- **Retention policy:** this project has no automatic data-deletion job. Audit logs, resolved
+  reports, and maintenance history currently accumulate indefinitely. A real deployment handling
+  real personal data should decide and document a retention period (e.g. "delete resolved reports
+  older than N years") consistent with its data protection obligations (see
+  [PRIVACY.md](PRIVACY.md)) and implement it as an explicit, reviewed job — not a default of this
+  codebase.
+- **Secrets rotation:** `JWT_SECRET` rotation invalidates every existing session (users must log
+  in again) — there is no dual-secret grace period. Plan rotations accordingly.

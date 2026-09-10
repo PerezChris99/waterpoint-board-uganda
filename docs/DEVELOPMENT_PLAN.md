@@ -307,6 +307,29 @@ stays linear.
     and `docs/DATA-METHODOLOGY.md` as NOT reviewed by a native speaker — a real deployment should
     have it checked before relying on it.
   - Unit tested (`i18n.test.ts`); lint/typecheck/test all pass with no new dependencies added.
+- [x] **Phase 25 — Operational hardening (roadmap "Phase 4")**
+  - `src/lib/rate-limit.ts` now supports a shared Upstash Redis backend (plain HTTP REST API, no
+    client SDK dependency — same pattern as `sendNotification()`/`sendSms()`) when
+    `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are set, closing the previously-documented
+    "in-memory limiter isn't shared across instances" gap. Falls back to the in-memory limiter by
+    default and on any Upstash failure (fails open rather than blocking login/reporting). All 5
+    call sites (login x2, register, reports, USSD) updated to `await` the now-async function.
+  - Added `src/lib/logger.ts`: structured JSON log lines (timestamp/level/message/context) for
+    every unhandled API error, replacing a bare `console.error(error)` in `rbac.ts`'s central
+    `apiErrorResponse()`. Deliberately does not hand-roll a specific error-tracking vendor's wire
+    protocol (e.g. Sentry) — documented in `docs/DEPLOYMENT.md` how to add `@sentry/nextjs` for
+    real error tracking, which auto-instruments `console.error` with no further code changes.
+  - Added a "Data retention and backups" section to `docs/DEPLOYMENT.md`: Neon PITR window,
+    recommended independent periodic backups, retention-policy guidance, and secrets-rotation
+    notes (`JWT_SECRET` rotation invalidates all sessions immediately, no grace period).
+  - Added a "Uganda's Data Protection and Privacy Act, 2019" section to `docs/PRIVACY.md` and the
+    `/privacy` page: named data controller (demo-scale placeholder, explicitly flagged as
+    needing replacement by a real deployment), lawful basis, data subject rights, and a
+    cross-border storage disclosure (Vercel/Neon may store data outside Uganda).
+  - A Terms of Service page already existed (`/terms`) and was reviewed as adequate — no changes
+    needed there.
+  - Unit tested (`logger.test.ts`, extended `rate-limit.test.ts` covering the Upstash and
+    fallback-on-failure paths); lint/typecheck/test all pass with no new dependencies added.
 
 ## Required checks before merging a feature branch into `perez`
 

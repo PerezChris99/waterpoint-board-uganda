@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const limit = rateLimit(`report:${clientIpFrom(request)}`, 20, 60 * 60 * 1000);
+  const limit = await rateLimit(`report:${clientIpFrom(request)}`, 20, 60 * 60 * 1000);
   if (!limit.allowed) {
     return NextResponse.json(
       { error: { message: "Too many reports submitted. Try again later." } },

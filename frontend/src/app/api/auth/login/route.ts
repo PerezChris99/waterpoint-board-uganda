@@ -7,7 +7,7 @@ import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(request: Request) {
-  const limit = rateLimit(`login:${clientIpFrom(request)}`, 10, 15 * 60 * 1000);
+  const limit = await rateLimit(`login:${clientIpFrom(request)}`, 10, 15 * 60 * 1000);
   if (!limit.allowed) {
     return NextResponse.json(
       { error: { message: "Too many login attempts. Try again later." } },
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   // Secondary, account-scoped limit: catches credential-stuffing spread across many IPs
   // against one specific account, which the IP-only limit above can't see.
-  const accountLimit = rateLimit(`login:account:${email}`, 10, 15 * 60 * 1000);
+  const accountLimit = await rateLimit(`login:account:${email}`, 10, 15 * 60 * 1000);
   if (!accountLimit.allowed) {
     return NextResponse.json(
       { error: { message: "Too many login attempts. Try again later." } },

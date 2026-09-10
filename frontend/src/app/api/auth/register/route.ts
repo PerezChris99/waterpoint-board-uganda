@@ -7,7 +7,7 @@ import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(request: Request) {
-  const limit = rateLimit(`register:${clientIpFrom(request)}`, 5, 15 * 60 * 1000);
+  const limit = await rateLimit(`register:${clientIpFrom(request)}`, 5, 15 * 60 * 1000);
   if (!limit.allowed) {
     return NextResponse.json(
       { error: { message: "Too many registration attempts. Try again later." } },

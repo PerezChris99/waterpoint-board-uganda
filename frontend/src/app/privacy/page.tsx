@@ -106,6 +106,42 @@ export default function PrivacyPage() {
             data it holds.
           </p>
         </section>
+        <section>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
+            Uganda&rsquo;s Data Protection and Privacy Act, 2019
+          </h2>
+          <p className="mt-2">
+            This platform is designed with Uganda&rsquo;s Data Protection and Privacy Act, 2019
+            (&ldquo;the DPPA&rdquo;) in mind, whose regulator is the National Information Technology
+            Authority, Uganda (NITA-U).
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>
+              <strong>Data controller:</strong> on this public demo instance, WaterPoint Board Uganda
+              (operated by Perez Chris) is the data controller for demo/account data only — see the
+              contact icons in the footer. <em>A real production deployment for an actual district,
+              NGO, or government body must register its own named data controller with NITA-U and
+              update this notice accordingly</em> — this is a demo-scale placeholder, not a
+              substitute for that registration.
+            </li>
+            <li>
+              <strong>Lawful basis:</strong> account data is processed with the account holder&rsquo;s
+              consent, given at registration; anonymous report data is processed on the basis of
+              legitimate interest in community water-point transparency.
+            </li>
+            <li>
+              <strong>Data subject rights:</strong> under the DPPA, you may request access to,
+              correction of, or deletion of your personal data, and may object to further
+              processing. See &ldquo;Your rights&rdquo; above for how to make a request.
+            </li>
+            <li>
+              <strong>Cross-border storage:</strong> this demo instance is hosted on infrastructure
+              (Vercel, Neon) that may store data outside Uganda. A real deployment should confirm
+              its hosting provider and region meet the DPPA&rsquo;s cross-border transfer
+              requirements before going live with real personal data.
+            </li>
+          </ul>
+        </section>
       </div>
     </main>
   );
