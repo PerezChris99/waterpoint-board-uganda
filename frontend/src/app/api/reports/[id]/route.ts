@@ -27,17 +27,36 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         { status: 403 },
       );
     }
+    if (
+      session.role === "ADMIN" &&
+      session.organizationId &&
+      report.waterPoint.organizationId !== session.organizationId
+    ) {
+      return NextResponse.json(
+        { error: { message: "This report is outside your organization" } },
+        { status: 403 },
+      );
+    }
 
     const updated = await prisma.report.update({
       where: { id },
-      data: { status: parsed.data.status, resolutionNotes: parsed.data.resolutionNotes },
+      data: {
+        status: parsed.data.status,
+        resolutionNotes: parsed.data.resolutionNotes,
+        moderationStatus: parsed.data.moderationStatus,
+      },
     });
     await writeAuditLog({
       actorId: session.sub,
       action: "REPORT_STATUS_UPDATED",
       entityType: "Report",
       entityId: id,
-      metadata: { from: report.status, to: parsed.data.status },
+      metadata: {
+        from: report.status,
+        to: parsed.data.status ?? report.status,
+        moderationFrom: report.moderationStatus,
+        moderationTo: parsed.data.moderationStatus ?? report.moderationStatus,
+      },
     });
 
     return NextResponse.json({ report: updated });

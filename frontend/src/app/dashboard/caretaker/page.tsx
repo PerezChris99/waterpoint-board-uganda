@@ -3,7 +3,8 @@ import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
 import { StatusBadge } from "@/components/status-badge";
 import { CaretakerActions } from "@/components/caretaker-actions";
-import { ISSUE_LABELS, REPORT_STATUS_LABELS } from "@/lib/labels";
+import { ReportModerationActions } from "@/components/report-moderation-actions";
+import { ISSUE_LABELS, REPORT_STATUS_LABELS, MODERATION_STATUS_LABELS } from "@/lib/labels";
 
 export const revalidate = 0;
 
@@ -61,6 +62,15 @@ export default async function CaretakerDashboardPage() {
                         </span>
                       </div>
                       <p className="mt-1 text-black/70 dark:text-white/70">{report.description}</p>
+                      {report.moderationStatus === "PENDING_REVIEW" && (
+                        <>
+                          <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+                            {MODERATION_STATUS_LABELS.PENDING_REVIEW} — anonymous submission, not
+                            yet shown publicly
+                          </p>
+                          <ReportModerationActions reportId={report.id} />
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>

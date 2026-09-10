@@ -250,6 +250,21 @@ stays linear.
     transparency board still shows all data regardless of organization.
   - Seed data adds 3 sample Organizations to prove the model end-to-end without disturbing the
     existing deterministic dataset.
+- [x] **Phase 21 — Moderation queue for anonymous reports (roadmap "Phase 2a")**
+  - Added a `ModerationStatus` enum (`PENDING_REVIEW`, `APPROVED`, `REJECTED`) and
+    `moderationStatus` field on `Report`, defaulting to `APPROVED`. `POST /api/reports` now sets
+    it to `PENDING_REVIEW` for anonymous (unauthenticated) submissions and `APPROVED` for
+    submissions from a logged-in account.
+  - Public-facing surfaces (`/water-points/[id]` detail page, `/api/public/insights`) now only
+    ever show `APPROVED` reports/report-derived stats — a pending or rejected anonymous claim is
+    invisible to the public until moderated.
+  - Caretaker/admin dashboards and `GET /api/reports` still show every report, including pending
+    ones (with a "Pending review" badge), plus new Approve/Reject actions
+    (`ReportModerationActions` component, `moderationStatus` field on the existing
+    `PATCH /api/reports/[id]` endpoint). Moderation actions respect the same caretaker-ownership
+    and organization-scoping rules as status updates.
+  - Seed data now produces a realistic mix of already-approved and a handful of freshly
+    `PENDING_REVIEW` anonymous reports so the moderation queue is visible out of the box.
 
 ## Required checks before merging a feature branch into `perez`
 

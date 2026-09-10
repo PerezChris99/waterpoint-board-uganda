@@ -32,10 +32,19 @@ export const reportSchema = z.object({
   reporterName: z.string().trim().max(100).optional(),
 });
 
-export const reportStatusUpdateSchema = z.object({
-  status: z.enum(["OPEN", "ACKNOWLEDGED", "IN_PROGRESS", "RESOLVED", "DISMISSED"]),
-  resolutionNotes: z.string().trim().max(2000).optional(),
-});
+export const reportStatusEnum = z.enum(["OPEN", "ACKNOWLEDGED", "IN_PROGRESS", "RESOLVED", "DISMISSED"]);
+
+export const reportStatusUpdateSchema = z
+  .object({
+    status: reportStatusEnum.optional(),
+    resolutionNotes: z.string().trim().max(2000).optional(),
+    // Moderation of anonymous submissions is separate from the operational status above —
+    // a caretaker/admin can approve/reject a pending report without necessarily changing status.
+    moderationStatus: z.enum(["APPROVED", "REJECTED"]).optional(),
+  })
+  .refine((data) => data.status !== undefined || data.moderationStatus !== undefined, {
+    message: "Provide a status or moderationStatus to update",
+  });
 
 export const waterPointStatusUpdateSchema = z.object({
   status: z.enum([
