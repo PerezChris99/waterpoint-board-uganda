@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getVerifiedSession, type VerifiedSessionPayload } from "@/lib/verified-session";
 import type { Role } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 export class ApiError extends Error {
   status: number;
@@ -41,6 +42,8 @@ export function apiErrorResponse(error: unknown): NextResponse {
   if (error instanceof ApiError) {
     return NextResponse.json({ error: { message: error.message } }, { status: error.status });
   }
-  console.error(error);
+  logger.error("Unhandled API error", {
+    error: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error,
+  });
   return NextResponse.json({ error: { message: "Internal server error" } }, { status: 500 });
 }

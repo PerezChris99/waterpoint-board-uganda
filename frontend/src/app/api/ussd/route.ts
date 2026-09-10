@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const phoneNumber = String(form.get("phoneNumber") ?? "unknown");
   const rawText = String(form.get("text") ?? "");
 
-  const limit = rateLimit(`ussd:${phoneNumber}`, 20, 60 * 60 * 1000);
+  const limit = await rateLimit(`ussd:${phoneNumber}`, 20, 60 * 60 * 1000);
   if (!limit.allowed) {
     return textResponse("END Too many requests. Please try again later.");
   }
