@@ -265,6 +265,21 @@ stays linear.
     and organization-scoping rules as status updates.
   - Seed data now produces a realistic mix of already-approved and a handful of freshly
     `PENDING_REVIEW` anonymous reports so the moderation queue is visible out of the box.
+- [x] **Phase 22 — Escalation + notifications (roadmap "Phase 2b")**
+  - Added `src/lib/escalation.ts`: a report `OPEN`/`ACKNOWLEDGED` for more than 14 days
+    (`ESCALATION_THRESHOLD_DAYS`) is "escalated" — computed on read, no new schema field, no
+    scheduled job required for this part. Surfaced in the caretaker/admin dashboard with a red
+    "Escalated" label. Has dedicated unit tests (`escalation.test.ts`).
+  - Added `src/lib/notifications.ts`: a provider-agnostic `sendNotification()` that calls Resend's
+    HTTP API directly (no new dependency) when `RESEND_API_KEY` is set, and otherwise safely logs
+    and no-ops — nothing breaks in an unconfigured environment (including this sandbox, which has
+    no real email credentials).
+  - `POST /api/reports` now best-effort emails the assigned caretaker whenever a new report comes
+    in for their water point (failures are swallowed, never block report submission).
+  - Added `GET /api/cron/escalations`: a `CRON_SECRET`-gated digest endpoint (401/deny-by-default
+    if the secret is unset or wrong) that emails each caretaker a summary of their currently
+    escalated reports. Wired to Vercel Cron via `frontend/vercel.json` (daily at 06:00 UTC).
+    Documented in `docs/DEPLOYMENT.md` along with the new optional env vars in `.env.example`.
 
 ## Required checks before merging a feature branch into `perez`
 

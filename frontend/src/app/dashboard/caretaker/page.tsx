@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { CaretakerActions } from "@/components/caretaker-actions";
 import { ReportModerationActions } from "@/components/report-moderation-actions";
 import { ISSUE_LABELS, REPORT_STATUS_LABELS, MODERATION_STATUS_LABELS } from "@/lib/labels";
+import { isEscalated } from "@/lib/escalation";
 
 export const revalidate = 0;
 
@@ -62,6 +63,11 @@ export default async function CaretakerDashboardPage() {
                         </span>
                       </div>
                       <p className="mt-1 text-black/70 dark:text-white/70">{report.description}</p>
+                      {isEscalated(report) && (
+                        <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
+                          Escalated — unresolved for over 14 days
+                        </p>
+                      )}
                       {report.moderationStatus === "PENDING_REVIEW" && (
                         <>
                           <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">

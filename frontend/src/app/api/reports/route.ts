@@ -5,6 +5,8 @@ import { reportSchema, reportStatusEnum } from "@/lib/validation";
 import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { requireRole, apiErrorResponse, organizationScopeWhere } from "@/lib/rbac";
+import { sendNotification } from "@/lib/notifications";
+import { ISSUE_LABELS } from "@/lib/labels";
 
 export async function GET(request: Request) {
   try {
@@ -59,7 +61,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const waterPoint = await prisma.waterPoint.findUnique({ where: { id: parsed.data.waterPointId } });
+  const waterPoint = await prisma.waterPoint.findUnique({
+    where: { id: parsed.data.waterPointId },
+    include: { caretaker: { select: { email: true, name: true } } },
+  });
   if (!waterPoint) {
     return NextResponse.json({ error: { message: "Water point not found" } }, { status: 404 });
   }
@@ -77,6 +82,15 @@ export async function POST(request: Request) {
       moderationStatus: session ? "APPROVED" : "PENDING_REVIEW",
     },
   });
+
+  // Best-effort: never let a notification failure affect the report submission itself.
+  if (waterPoint.caretaker?.email) {
+    void sendNotification({
+      to: waterPoint.caretaker.email,
+      subject: `New report: ${waterPoint.name}`,
+      body: `${ISSUE_LABELS[parsed.data.issueType]} reported at ${waterPoint.name}.\n\n${parsed.data.description}\n\nView it in your dashboard to acknowledge or resolve.`,
+    }).catch(() => {});
+  }
 
   await writeAuditLog({
     actorId: session?.sub,
