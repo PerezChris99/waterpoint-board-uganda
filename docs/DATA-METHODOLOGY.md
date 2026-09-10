@@ -1,5 +1,8 @@
 # Data Methodology
 
+> This document describes the current demo/seed dataset. For the plan to move toward real data
+> and a real institutional pilot, see [docs/NWSC-PRODUCTION-STRATEGY.md](NWSC-PRODUCTION-STRATEGY.md).
+
 ## What this platform shows
 
 WaterPoint Board Uganda displays **community-reported** operational information about water
