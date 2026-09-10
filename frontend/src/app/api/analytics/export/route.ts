@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireRole, apiErrorResponse } from "@/lib/rbac";
+import { requireRole, apiErrorResponse, organizationScopeWhere } from "@/lib/rbac";
 
 function toCsvRow(values: (string | number | null | undefined)[]): string {
   return values
@@ -19,9 +19,10 @@ function toCsvRow(values: (string | number | null | undefined)[]): string {
 
 export async function GET() {
   try {
-    await requireRole("ADMIN");
+    const session = await requireRole("ADMIN");
 
     const waterPoints = await prisma.waterPoint.findMany({
+      where: organizationScopeWhere(session),
       include: {
         caretaker: { select: { name: true } },
         verifiedBy: { select: { name: true } },

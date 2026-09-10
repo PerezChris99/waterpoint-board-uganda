@@ -18,6 +18,28 @@ enum Role {
   MEMBER
 }
 
+// A managing entity (district local government rural water unit, NWSC rural unit, NGO, etc.)
+// that owns a subset of water points/users. Nullable on User/WaterPoint by design: rows with
+// no organization are treated as platform-wide/demo data visible to a super-admin (an ADMIN
+// with organizationId == null). This keeps the model additive and non-breaking.
+enum OrganizationType {
+  DISTRICT_LOCAL_GOVERNMENT
+  NWSC_RURAL_UNIT
+  NGO
+  OTHER
+}
+
+model Organization {
+  id           String           @id @default(cuid())
+  name         String
+  type         OrganizationType
+  contactEmail String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  users        User[]
+  waterPoints  WaterPoint[]
+}
+
 enum WaterPointType {
   BOREHOLE
   SHALLOW_WELL
@@ -71,6 +93,10 @@ model User {
   // Bumped on logout and on role changes so a previously-issued JWT (which embeds the value at
   // sign time) is rejected by requireRole() even though the token itself hasn't expired yet.
   tokenVersion        Int              @default(0)
+  // Scopes an ADMIN/CARETAKER to a single managing Organization; null means platform-wide
+  // access (super-admin) or unassociated demo data. See Organization above.
+  organizationId      String?
+  organization        Organization?    @relation(fields: [organizationId], references: [id])
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   reports             Report[]         @relation("ReporterReports")
@@ -80,6 +106,7 @@ model User {
   auditLogs           AuditLog[]
 
   @@index([role])
+  @@index([organizationId])
 }
 
 model WaterPoint {
@@ -102,6 +129,9 @@ model WaterPoint {
   verificationMethod VerificationMethod?
   verifiedById       String?
   verifiedBy         User?               @relation("Verifier", fields: [verifiedById], references: [id])
+  // Scopes this water point to a managing Organization; null means platform-wide/demo data.
+  organizationId     String?
+  organization       Organization?       @relation(fields: [organizationId], references: [id])
   caretakerId        String?
   caretaker          User?               @relation("Caretaker", fields: [caretakerId], references: [id])
   reports            Report[]
@@ -113,6 +143,7 @@ model WaterPoint {
   @@index([village])
   @@index([caretakerId])
   @@index([verifiedById])
+  @@index([organizationId])
   @@index([type])
 }
 

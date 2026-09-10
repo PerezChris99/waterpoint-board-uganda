@@ -24,6 +24,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!existing) {
       return NextResponse.json({ error: { message: "User not found" } }, { status: 404 });
     }
+    // An org-scoped admin may only manage users within their own Organization; a super-admin
+    // (organizationId == null) can manage anyone.
+    if (session.organizationId && existing.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { error: { message: "User not found" } },
+        { status: 404 },
+      );
+    }
 
     // Bump tokenVersion so any session this user already has open is invalidated immediately —
     // otherwise their previously-issued JWT would keep its old role claim until it expires.

@@ -45,6 +45,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         { status: 403 },
       );
     }
+    // An org-scoped admin may only update water points within their own Organization; a
+    // super-admin (organizationId == null) can update anything, including unassigned demo data.
+    if (
+      session.role === "ADMIN" &&
+      session.organizationId &&
+      waterPoint.organizationId !== session.organizationId
+    ) {
+      return NextResponse.json(
+        { error: { message: "This water point is outside your organization" } },
+        { status: 403 },
+      );
+    }
 
     const updated = await prisma.waterPoint.update({
       where: { id },

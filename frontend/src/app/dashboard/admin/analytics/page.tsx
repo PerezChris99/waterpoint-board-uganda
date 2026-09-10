@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
+import { organizationScopeWhere } from "@/lib/rbac";
 import { STATUS_LABELS, ISSUE_LABELS } from "@/lib/labels";
 import { StatusPieChart, IssueBarChart } from "@/components/charts";
 import type { WaterPointStatus, ReportIssueType } from "@prisma/client";
@@ -14,13 +15,14 @@ function daysAgo(days: number): Date {
 export default async function AdminAnalyticsPage() {
   const session = await getVerifiedSession();
   if (!session || session.role !== "ADMIN") redirect("/forbidden");
+  const scope = organizationScopeWhere(session);
 
   const [statusGroups, issueGroups, villageGroups, reportsLast30Days] = await Promise.all([
-    prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
-    prisma.report.groupBy({ by: ["issueType"], _count: true }),
-    prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
+    prisma.waterPoint.groupBy({ by: ["status"], _count: true, where: scope }),
+    prisma.report.groupBy({ by: ["issueType"], _count: true, where: { waterPoint: scope } }),
+    prisma.waterPoint.groupBy({ by: ["village"], _count: true, where: scope }),
     prisma.report.count({
-      where: { createdAt: { gte: daysAgo(30) } },
+      where: { createdAt: { gte: daysAgo(30) }, waterPoint: scope },
     }),
   ]);
 

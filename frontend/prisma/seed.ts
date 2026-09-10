@@ -9,7 +9,7 @@
  *
  * All data is fictional. See docs/DATA-METHODOLOGY.md.
  */
-import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus, type VerificationMethod } from "@prisma/client";
+import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus, type VerificationMethod, type OrganizationType } from "@prisma/client";
 import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
@@ -182,6 +182,35 @@ async function main() {
   await prisma.report.deleteMany();
   await prisma.waterPoint.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.organization.deleteMany();
+
+  // --- Sample Organizations ---
+  // Demonstrates the tenancy model exists (an ADMIN/CARETAKER assigned to one of these would
+  // only see/manage that org's own data — see organizationScopeWhere() in src/lib/rbac.ts).
+  // Deliberately NOT assigned to any of the deterministic seed water points/users below, so the
+  // existing demo dataset keeps behaving exactly as before (visible to the platform-wide,
+  // organizationId === null, super-admin account).
+  const SAMPLE_ORGANIZATIONS: { name: string; type: OrganizationType; contactEmail: string }[] = [
+    {
+      name: "Wakiso District Local Government — Water Office",
+      type: "DISTRICT_LOCAL_GOVERNMENT",
+      contactEmail: "water.office@wakiso.example.go.ug",
+    },
+    {
+      name: "NWSC Rural Growth Centres Unit",
+      type: "NWSC_RURAL_UNIT",
+      contactEmail: "rural.units@nwsc.example.co.ug",
+    },
+    {
+      name: "Water For People Uganda (fictional demo record)",
+      type: "NGO",
+      contactEmail: "uganda@waterforpeople.example.org",
+    },
+  ];
+  for (const org of SAMPLE_ORGANIZATIONS) {
+    await prisma.organization.create({ data: org });
+  }
+  console.log(`Created ${SAMPLE_ORGANIZATIONS.length} sample organizations.`);
 
   // --- Users ---
   const adminPassword = await hashPassword("Admin#2026Secure");

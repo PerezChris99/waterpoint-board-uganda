@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { getVerifiedSession } from "@/lib/verified-session";
+import { getVerifiedSession, type VerifiedSessionPayload } from "@/lib/verified-session";
 import type { Role } from "@prisma/client";
-import type { SessionPayload } from "@/lib/jwt";
 
 export class ApiError extends Error {
   status: number;
@@ -16,7 +15,7 @@ export class ApiError extends Error {
  * Re-checks the session against the database so a logged-out or role-changed user's
  * still-unexpired JWT can't be reused (see tokenVersion on the User model).
  */
-export async function requireRole(...allowed: Role[]): Promise<SessionPayload> {
+export async function requireRole(...allowed: Role[]): Promise<VerifiedSessionPayload> {
   const session = await getVerifiedSession();
   if (!session) throw new ApiError(401, "Authentication required");
 
@@ -24,6 +23,18 @@ export async function requireRole(...allowed: Role[]): Promise<SessionPayload> {
     throw new ApiError(403, "You do not have permission to perform this action");
   }
   return session;
+}
+
+/**
+ * Builds a Prisma `where` fragment that scopes a query to the caller's Organization.
+ * An ADMIN/CARETAKER with no organizationId is treated as a platform-wide super-admin
+ * (sees/manages everything, including unassigned demo data) — returns an empty filter.
+ * An org-scoped caller only sees rows belonging to their own Organization.
+ */
+export function organizationScopeWhere(session: { organizationId: string | null }): {
+  organizationId?: string;
+} {
+  return session.organizationId ? { organizationId: session.organizationId } : {};
 }
 
 export function apiErrorResponse(error: unknown): NextResponse {

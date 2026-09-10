@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/verified-session";
 import { prisma } from "@/lib/db";
+import { organizationScopeWhere } from "@/lib/rbac";
 import { UserRoleSelect } from "@/components/user-role-select";
 import { ROLE_LABELS } from "@/lib/labels";
 
@@ -11,6 +12,7 @@ export default async function AdminUsersPage() {
   if (!session || session.role !== "ADMIN") redirect("/forbidden");
 
   const users = await prisma.user.findMany({
+    where: organizationScopeWhere(session),
     orderBy: { createdAt: "asc" },
     select: {
       id: true,
@@ -18,6 +20,7 @@ export default async function AdminUsersPage() {
       email: true,
       role: true,
       village: true,
+      organization: { select: { name: true } },
       _count: { select: { caretakerOf: true, reports: true } },
     },
   });
@@ -34,6 +37,7 @@ export default async function AdminUsersPage() {
               <th className="py-2 pr-4">Name</th>
               <th className="py-2 pr-4">Email</th>
               <th className="py-2 pr-4">Village</th>
+              <th className="py-2 pr-4">Organization</th>
               <th className="py-2 pr-4">Role</th>
               <th className="py-2 pr-4">Assigned points</th>
               <th className="py-2 pr-4">Reports filed</th>
@@ -45,6 +49,9 @@ export default async function AdminUsersPage() {
                 <td className="py-2 pr-4">{user.name}</td>
                 <td className="py-2 pr-4 text-black/60 dark:text-white/60">{user.email}</td>
                 <td className="py-2 pr-4">{user.village ?? "—"}</td>
+                <td className="py-2 pr-4 text-black/60 dark:text-white/60">
+                  {user.organization?.name ?? "— (platform-wide)"}
+                </td>
                 <td className="py-2 pr-4">
                   {user.id === session.sub ? (
                     ROLE_LABELS[user.role]
