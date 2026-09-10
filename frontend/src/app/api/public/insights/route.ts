@@ -5,7 +5,9 @@ import type { WaterPointType, WaterPointStatus, ReportIssueType } from "@prisma/
 
 // Public, unauthenticated aggregate data for the map + statistics page.
 // No PII (reporter identity, emails, caretaker names) is ever included here.
-export const revalidate = 60;
+// Forced dynamic so this never runs as part of the build's static prerender step - a build
+// should never fail just because the DB is briefly unreachable or a migration hasn't landed yet.
+export const dynamic = "force-dynamic";
 
 function monthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
