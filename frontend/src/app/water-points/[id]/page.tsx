@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { StatusBadge } from "@/components/status-badge";
-import { TYPE_LABELS, ISSUE_LABELS, REPORT_STATUS_LABELS } from "@/lib/labels";
+import { TYPE_LABELS, ISSUE_LABELS, REPORT_STATUS_LABELS, VERIFICATION_METHOD_LABELS } from "@/lib/labels";
 import { ReportForm } from "@/components/report-form";
 
 export const revalidate = 0;
@@ -12,6 +12,7 @@ async function getWaterPoint(id: string) {
     where: { id },
     include: {
       caretaker: { select: { name: true } },
+      verifiedBy: { select: { name: true, role: true } },
       reports: { orderBy: { createdAt: "desc" }, take: 10 },
       maintenanceLogs: {
         orderBy: { createdAt: "desc" },
@@ -77,7 +78,21 @@ export default async function WaterPointDetailPage({
               <dt className="text-black/50 dark:text-white/50">Caretaker</dt>
               <dd className="mt-0.5 font-medium">{waterPoint.caretaker?.name ?? "Unassigned"}</dd>
             </div>
+            <div>
+              <dt className="text-black/50 dark:text-white/50">Verification</dt>
+              <dd className="mt-0.5 font-medium">
+                {waterPoint.verificationMethod
+                  ? VERIFICATION_METHOD_LABELS[waterPoint.verificationMethod]
+                  : "Not yet verified"}
+              </dd>
+            </div>
           </dl>
+          {waterPoint.verifiedBy && (
+            <p className="mt-3 text-xs text-black/50 dark:text-white/50">
+              Last confirmed by {waterPoint.verifiedBy.name} · community-reported data, not a
+              water-quality certification.
+            </p>
+          )}
           {waterPoint.description && (
             <p className="mt-4 text-sm text-black/70 dark:text-white/70">{waterPoint.description}</p>
           )}

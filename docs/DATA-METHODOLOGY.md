@@ -1,5 +1,8 @@
 # Data Methodology
 
+> This document describes the current demo/seed dataset. For the plan to move toward real data
+> and a real institutional pilot, see [docs/NWSC-PRODUCTION-STRATEGY.md](NWSC-PRODUCTION-STRATEGY.md).
+
 ## What this platform shows
 
 WaterPoint Board Uganda displays **community-reported** operational information about water
@@ -22,6 +25,20 @@ We deliberately avoid absolute claims such as "This water is safe."
 
 Each water point tracks `lastVerifiedAt`. The public directory and detail pages surface this so
 users can judge how recent the reported status is before relying on it.
+
+## Data provenance
+
+Every status update also records *how* and *by whom* it was last confirmed, so real deployments
+can distinguish a rigorous check from a casual one:
+
+- `verificationMethod` — one of: field visit, district survey, caretaker update, community report,
+  admin override, or self-reported.
+- `verifiedBy` — the user account that made the update (a caretaker's own status change, or an
+  admin override).
+
+This is **provenance metadata, not a quality guarantee** — "field visit" means someone recorded
+that they visited, not that the platform independently verified it. See "What this platform does
+not do" below.
 
 ## Seed data
 

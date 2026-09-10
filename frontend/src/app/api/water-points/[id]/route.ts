@@ -10,6 +10,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     where: { id },
     include: {
       caretaker: { select: { id: true, name: true } },
+      verifiedBy: { select: { id: true, name: true, role: true } },
       reports: { orderBy: { createdAt: "desc" }, take: 20 },
       maintenanceLogs: {
         orderBy: { createdAt: "desc" },
@@ -47,7 +48,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const updated = await prisma.waterPoint.update({
       where: { id },
-      data: { status: parsed.data.status, lastVerifiedAt: new Date() },
+      data: {
+        status: parsed.data.status,
+        lastVerifiedAt: new Date(),
+        verifiedById: session.sub,
+        verificationMethod: session.role === "ADMIN" ? "ADMIN_OVERRIDE" : "CARETAKER_UPDATE",
+      },
     });
     await writeAuditLog({
       actorId: session.sub,

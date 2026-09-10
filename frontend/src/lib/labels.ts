@@ -1,4 +1,11 @@
-import type { WaterPointStatus, WaterPointType, ReportIssueType, ReportStatus, Role } from "@prisma/client";
+import type {
+  WaterPointStatus,
+  WaterPointType,
+  ReportIssueType,
+  ReportStatus,
+  Role,
+  VerificationMethod,
+} from "@prisma/client";
 
 export const STATUS_LABELS: Record<WaterPointStatus, string> = {
   AVAILABLE: "Reported available",
@@ -45,4 +52,14 @@ export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Administrator",
   CARETAKER: "Caretaker",
   MEMBER: "Community member",
+};
+
+// How a water point's current status was last confirmed — provenance, not a quality guarantee.
+export const VERIFICATION_METHOD_LABELS: Record<VerificationMethod, string> = {
+  FIELD_VISIT: "Field visit",
+  COMMUNITY_REPORT: "Community report",
+  DISTRICT_SURVEY: "District survey",
+  CARETAKER_UPDATE: "Caretaker update",
+  ADMIN_OVERRIDE: "Admin override",
+  SELF_REPORTED: "Self-reported",
 };

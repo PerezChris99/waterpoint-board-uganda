@@ -194,6 +194,44 @@ the whole platform can deploy as a single Vercel project against a serverless Po
       timeline reveal is on the blueprint's own allowed-list), custom SVG icons, and no
       pill-badge/gradient-text/glassmorphism-everywhere patterns — so left unchanged.
 
+## Production roadmap (portfolio → real pilot)
+
+Starting with Phase 18, the project is moving from a portfolio/demo posture toward something a
+real institutional pilot (a district water office, an NGO, or NWSC's rural-expansion program)
+could actually use. Each numbered phase below maps to a stage in
+[docs/NWSC-PRODUCTION-STRATEGY.md](NWSC-PRODUCTION-STRATEGY.md#3-recommended-phased-roadmap)'s
+"Phase 0–4" plan; the phase numbers here continue the existing repo-wide sequence so history
+stays linear.
+
+- [x] **Phase 18 — Production strategy & problem audit (roadmap "Phase 0": positioning, no code)**
+  - Added `docs/NWSC-PRODUCTION-STRATEGY.md`: a sourced audit of Uganda's water sector (who
+    governs piped/urban vs. rural point-source water — NWSC vs. District Local
+    Governments/MWE/DWD), the documented problems this platform can plausibly help with
+    (no real-time rural water-point functionality data, slow caretaker/HPMA accountability, no
+    public transparency layer, fragmented feedback loops), what NWSC already owns and this
+    project must never duplicate or overclaim (billing, water-quality certification, network
+    SCADA), and a gap analysis from demo to real pilot (data provenance, tenancy/org model,
+    moderation queue, offline/SMS reach, legal/DPA-2019 compliance).
+  - Reframed `README.md`'s scope note and `docs/DATA-METHODOLOGY.md` from "portfolio/demonstration
+    project" to a production-readiness track that explicitly complements (never replaces) NWSC
+    and MWE, while keeping every existing "this is not a certification/regulatory system"
+    disclaimer intact — the honesty discipline carries forward unchanged.
+  - No schema or application code changed in this phase — it is intentionally research/positioning
+    only, so that Phases 19+ (data provenance fields, org/tenancy model, moderation, reach) build
+    against validated requirements instead of assumptions.
+- [x] **Phase 19 — Data provenance fields (roadmap "Phase 1a")**
+  - Added a `VerificationMethod` enum (`FIELD_VISIT`, `DISTRICT_SURVEY`, `CARETAKER_UPDATE`,
+    `COMMUNITY_REPORT`, `ADMIN_OVERRIDE`, `SELF_REPORTED`) and `verificationMethod`/`verifiedById`
+    fields on `WaterPoint` (nullable — additive, non-breaking schema change).
+  - `PATCH /api/water-points/[id]` now records who confirmed a status change and how
+    (`CARETAKER_UPDATE` vs `ADMIN_OVERRIDE`) every time status is updated, alongside the existing
+    `lastVerifiedAt` timestamp.
+  - Public water point detail page and the admin CSV export both surface the new provenance
+    fields. Seed data populates them deterministically (points still `NEEDS_VERIFICATION` stay
+    unverified/null, matching existing `lastVerifiedAt` behavior).
+  - Framed explicitly as data provenance, not a quality certification — `docs/DATA-METHODOLOGY.md`
+    updated with a "Data provenance" section.
+
 ## Required checks before merging a feature branch into `perez`
 
 - Frontend lint, TypeScript check, unit tests, production build.

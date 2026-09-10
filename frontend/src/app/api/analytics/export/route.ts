@@ -22,7 +22,11 @@ export async function GET() {
     await requireRole("ADMIN");
 
     const waterPoints = await prisma.waterPoint.findMany({
-      include: { caretaker: { select: { name: true } }, _count: { select: { reports: true } } },
+      include: {
+        caretaker: { select: { name: true } },
+        verifiedBy: { select: { name: true } },
+        _count: { select: { reports: true } },
+      },
       orderBy: { code: "asc" },
     });
 
@@ -37,6 +41,8 @@ export async function GET() {
       "caretaker",
       "reportCount",
       "lastVerifiedAt",
+      "verificationMethod",
+      "verifiedBy",
     ]);
     const rows = waterPoints.map((wp) =>
       toCsvRow([
@@ -50,6 +56,8 @@ export async function GET() {
         wp.caretaker?.name,
         wp._count.reports,
         wp.lastVerifiedAt?.toISOString(),
+        wp.verificationMethod,
+        wp.verifiedBy?.name,
       ]),
     );
 

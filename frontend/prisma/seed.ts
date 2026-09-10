@@ -9,7 +9,7 @@
  *
  * All data is fictional. See docs/DATA-METHODOLOGY.md.
  */
-import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus } from "@prisma/client";
+import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus, type VerificationMethod } from "@prisma/client";
 import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
@@ -104,6 +104,14 @@ const STATUS_WEIGHTS: [WaterPointStatus, number][] = [
   ["NEEDS_VERIFICATION", 15],
   ["UNDER_MAINTENANCE", 10],
   ["REPORTED_UNAVAILABLE", 5],
+];
+// Data provenance: how the seed pretends each point's current status was last confirmed.
+const VERIFICATION_METHOD_WEIGHTS: [VerificationMethod, number][] = [
+  ["FIELD_VISIT", 35],
+  ["DISTRICT_SURVEY", 25],
+  ["CARETAKER_UPDATE", 25],
+  ["COMMUNITY_REPORT", 10],
+  ["SELF_REPORTED", 5],
 ];
 const ISSUE_WEIGHTS: [ReportIssueType, number][] = [
   ["NO_WATER", 25],
@@ -233,6 +241,7 @@ async function main() {
       const code = `WP-${String(++seq).padStart(3, "0")}`;
       const installedYear = randInt(1998, 2023);
       const lastVerifiedDays = randInt(0, 120);
+      const isVerified = status !== "NEEDS_VERIFICATION";
 
       const wp = await prisma.waterPoint.create({
         data: {
@@ -248,7 +257,9 @@ async function main() {
           installedYear,
           source: pick(SOURCES),
           description: `${typeLabel(type)} serving ${village} and nearby households.`,
-          lastVerifiedAt: status === "NEEDS_VERIFICATION" ? null : daysAgo(lastVerifiedDays),
+          lastVerifiedAt: isVerified ? daysAgo(lastVerifiedDays) : null,
+          verificationMethod: isVerified ? weightedPick(VERIFICATION_METHOD_WEIGHTS) : null,
+          verifiedById: isVerified ? caretaker.id : null,
           caretakerId: caretaker.id,
         },
       });

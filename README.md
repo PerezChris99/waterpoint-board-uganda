@@ -9,10 +9,15 @@ Prisma, and PostgreSQL, deployed on Vercel.
 
 **Live demo:** [waterpointboarduganda.vercel.app](https://waterpointboarduganda.vercel.app)
 
-> **Scope note:** This is a portfolio/demonstration project modeling a small local community
-> utility — not a real government system, not a drinking-water certification platform, and not a
-> contamination-detection tool. All data (water points, users, reports) is fictional and
-> deterministic seed data. See [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
+> **Scope note:** This project is on a production-readiness track — the goal is a real
+> community water-point transparency and reporting tool for rural/peri-urban Uganda, positioned to
+> complement (never replace) National Water and Sewerage Corporation (NWSC) billing/network
+> operations and the Ministry of Water and Environment's water-point data collection. It is **not**
+> a drinking-water certification platform, a contamination-detection tool, or an official
+> government system, and currently ships with fictional, deterministic seed data — real deployment
+> requires the institutional validation and data-governance steps in
+> [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md). See also
+> [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
 ---
 
