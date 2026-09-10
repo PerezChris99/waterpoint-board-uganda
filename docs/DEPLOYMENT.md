@@ -67,3 +67,30 @@ teammate's shared dev database) — Docker is not required.
 ## Environment variables
 
 See `frontend/.env.example` for the full list. Never commit real `.env`/`.env.local` files.
+
+## Escalation notifications (optional)
+
+Reports left `OPEN`/`ACKNOWLEDGED` for more than 14 days are considered "escalated" (see
+`src/lib/escalation.ts`) — this is computed on read, no scheduled job is required for the app
+itself to work. To also get a daily email digest sent to affected caretakers:
+
+1. Set `RESEND_API_KEY` (and optionally `NOTIFICATIONS_FROM_EMAIL`) so `sendNotification()`
+   (`src/lib/notifications.ts`) sends real emails via [Resend](https://resend.com) instead of
+   just logging. With no key set, this is a safe no-op — nothing breaks, nothing sends.
+2. Set `CRON_SECRET` to a random secret. `GET /api/cron/escalations` requires
+   `Authorization: Bearer <CRON_SECRET>` and returns 401 for anything else, including when the
+   variable is unset.
+3. The Vercel Cron schedule is already configured in `frontend/vercel.json`:
+   ```json
+   {
+     "crons": [{ "path": "/api/cron/escalations", "schedule": "0 6 * * *" }]
+   }
+   ```
+   Vercel automatically sends the correct `Authorization` header for cron-triggered requests when
+   `CRON_SECRET` is set as a project environment variable — no extra wiring needed. Check your
+   current Vercel plan's cron limits (frequency, invocation count) in the Vercel dashboard; the
+   route itself still works fine if triggered manually/by another scheduler with the right secret.
+
+New report submissions also try to notify the assigned caretaker immediately via the same
+`sendNotification()` path (best-effort — a failed/unconfigured notification never blocks the
+report itself from being saved).
