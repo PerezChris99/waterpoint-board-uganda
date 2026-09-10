@@ -65,7 +65,7 @@ export default function HomePage() {
               href="/register"
               className="w-fit rounded-md border border-[var(--wb-water-500)] px-4 py-2 text-sm font-medium text-[var(--wb-water-500)] transition-colors hover:bg-[var(--wb-water-500)] hover:text-white"
             >
-              Create a demo account
+              Create an account
             </Link>
           </div>
           <p className="max-w-xl text-xs text-[var(--foreground)]/60">

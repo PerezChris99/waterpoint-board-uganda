@@ -70,10 +70,11 @@ export default function CopyrightPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">Demo data disclaimer</h2>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">Data disclaimer</h2>
           <p className="mt-2">
-            All water point, report, and user data visible on the public demo instance is fictional
-            and generated for demonstration purposes only. See our{" "}
+            Water point, report, and seeded-user data visible on the public instance is a
+            placeholder demonstration dataset pending real, verified data — only the
+            operator&apos;s own configured login is a real, private account. See our{" "}
             <a href="/data-methodology" className="underline">
               data methodology
             </a>{" "}

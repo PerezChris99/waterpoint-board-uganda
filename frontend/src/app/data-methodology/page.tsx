@@ -12,17 +12,19 @@ export default function DataMethodologyPage() {
       <h2 className="mt-6 text-lg font-semibold">What this platform shows</h2>
       <p className="mt-2 text-black/70 dark:text-white/70">
         WaterPoint Board Uganda displays <strong>community-reported</strong> operational
-        information about water points in one small, fictional demonstration community. Every
-        status shown is a report, not a guarantee.
+        information about water points. Every status shown is a report, not a guarantee. This is
+        production-ready software; the public instance currently runs on a placeholder
+        demonstration dataset while real, verified data is onboarded.
       </p>
       <h2 className="mt-6 text-lg font-semibold">Seed data</h2>
       <p className="mt-2 text-black/70 dark:text-white/70">
-        The platform ships with a fixed, deterministic seed dataset of 62 fictional water points,
-        24 fictional user accounts, and hundreds of fictional reports and maintenance records
-        spanning roughly two years. The seed script never runs automatically against a live
-        deployment — it is only used to populate demo environments, and the core water-point list
-        is never modified by the application itself. Only new reports, maintenance logs, and user
-        accounts grow through normal use.
+        The platform ships with a fixed, deterministic seed dataset of 153 placeholder water
+        points spread across real Ugandan towns and cities nationwide, 24 seeded user accounts,
+        and hundreds of placeholder reports and maintenance records spanning roughly two years.
+        The seed script never runs automatically against a live deployment, and the core
+        water-point list is never modified by the application itself. Only new reports,
+        maintenance logs, and user accounts grow through normal use. Login credentials for the
+        seeded accounts are private to the operator, not published.
       </p>
       <h2 className="mt-6 text-lg font-semibold">What this platform does not do</h2>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-black/70 dark:text-white/70">

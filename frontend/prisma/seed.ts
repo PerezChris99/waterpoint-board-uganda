@@ -2,17 +2,38 @@
  * Fixed, deterministic seed data for WaterPoint Board Uganda.
  *
  * This script is idempotent: it wipes and recreates the same dataset every
- * time it runs (same seeded PRNG), so the demo always shows the same ~60
- * water points, users, reports, and maintenance history. Application code
- * never mutates the core water-point list — only Reports/MaintenanceLogs
+ * time it runs (same seeded PRNG), so the seeded instance always shows the
+ * same ~150 water points, users, reports, and maintenance history. Application
+ * code never mutates the core water-point list — only Reports/MaintenanceLogs
  * grow, and only through the app's own reporting/caretaker flows.
  *
- * All data is fictional. See docs/DATA-METHODOLOGY.md.
+ * Water point site-level data is a placeholder dataset pending real, verified
+ * data (see docs/DATA-METHODOLOGY.md). Login credentials for the seeded admin,
+ * caretaker, and member accounts are NEVER hardcoded here — they come from your
+ * own untracked .env (SEED_ADMIN_EMAIL/PASSWORD, etc. — see .env.example), so
+ * only you know them. Every other seeded user gets a random, undisclosed
+ * password each run purely to satisfy the schema; nobody is meant to log into them.
  */
+import crypto from "node:crypto";
 import { PrismaClient, type Role, type WaterPointType, type WaterPointStatus, type ReportIssueType, type ReportStatus, type VerificationMethod, type OrganizationType, type ModerationStatus } from "@prisma/client";
 import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
+
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `Missing required env var ${name}. Set it in your own untracked .env before seeding — see .env.example. This keeps the seeded admin login private to you.`,
+    );
+  }
+  return value;
+}
+
+// Undisclosed, per-run password for seeded accounts nobody is meant to log into.
+function randomPassword(): string {
+  return crypto.randomBytes(18).toString("base64url");
+}
 
 // --- Deterministic PRNG (mulberry32) so the dataset is fixed across runs ---
 function mulberry32(seed: number) {
@@ -213,45 +234,51 @@ async function main() {
   console.log(`Created ${SAMPLE_ORGANIZATIONS.length} sample organizations.`);
 
   // --- Users ---
-  const adminPassword = await hashPassword("Admin#2026Secure");
+  // The one account that matters: private admin credentials only you know (required).
   await prisma.user.create({
     data: {
-      name: "Grace Nakato",
-      email: "admin@waterpointboard.example",
-      passwordHash: adminPassword,
+      name: process.env.SEED_ADMIN_NAME || "Admin",
+      email: requireEnv("SEED_ADMIN_EMAIL"),
+      passwordHash: await hashPassword(requireEnv("SEED_ADMIN_PASSWORD")),
       role: "ADMIN" as Role,
       village: "Kampala Central Estate",
     },
   });
 
-  const caretakerPassword = await hashPassword("Caretaker#2026");
   const caretakers = [];
   for (let i = 0; i < 8; i++) {
+    // Only the first caretaker is a real, loggable account — and only if you configured it.
+    const primary = i === 0;
+    const email = primary && process.env.SEED_CARETAKER_EMAIL ? process.env.SEED_CARETAKER_EMAIL : `caretaker${i + 1}@waterpointboard.example`;
+    const password = primary && process.env.SEED_CARETAKER_PASSWORD ? process.env.SEED_CARETAKER_PASSWORD : randomPassword();
     caretakers.push(
       await prisma.user.create({
         data: {
-          name: fullName(),
-          email: `caretaker${i + 1}@waterpointboard.example`,
-          passwordHash: caretakerPassword,
+          name: primary && process.env.SEED_CARETAKER_NAME ? process.env.SEED_CARETAKER_NAME : fullName(),
+          email,
+          passwordHash: await hashPassword(password),
           role: "CARETAKER" as Role,
           village: pick(ALL_VILLAGES),
-          // Fictional demo phone number (Uganda +256 format) so SMS notifications (Phase 23)
-          // have a realistic target to demonstrate against.
+          // Placeholder Uganda-format (+256) phone number so SMS notifications (Phase 23) have a
+          // realistic target — not a real number.
           phone: `+2567${String(10000000 + i).slice(-8)}`,
         },
       }),
     );
   }
 
-  const memberPassword = await hashPassword("Member#2026");
   const members = [];
   for (let i = 0; i < 15; i++) {
+    // Only the first member is a real, loggable account — and only if you configured it.
+    const primary = i === 0;
+    const email = primary && process.env.SEED_MEMBER_EMAIL ? process.env.SEED_MEMBER_EMAIL : `member${i + 1}@waterpointboard.example`;
+    const password = primary && process.env.SEED_MEMBER_PASSWORD ? process.env.SEED_MEMBER_PASSWORD : randomPassword();
     members.push(
       await prisma.user.create({
         data: {
-          name: fullName(),
-          email: `member${i + 1}@waterpointboard.example`,
-          passwordHash: memberPassword,
+          name: primary && process.env.SEED_MEMBER_NAME ? process.env.SEED_MEMBER_NAME : fullName(),
+          email,
+          passwordHash: await hashPassword(password),
           role: "MEMBER" as Role,
           village: pick(ALL_VILLAGES),
         },

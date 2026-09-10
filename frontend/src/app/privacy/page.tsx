@@ -98,12 +98,18 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">Public demo instance</h2>
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">Public instance</h2>
           <p className="mt-2">
-            The publicly hosted demo of this platform runs on fictional seed data for a composite,
-            invented community. A production deployment for a real district, NGO, or government body
-            would be provisioned with its own database and would follow this same policy for the real
-            data it holds.
+            This platform is production-ready software. The publicly hosted instance currently runs
+            on a placeholder demonstration water-point dataset while real, verified data is
+            onboarded — see{" "}
+            <a href="/data-methodology" className="underline">
+              data methodology
+            </a>
+            . Account holders on this instance are real people with private login credentials, not
+            shared demo accounts. A production deployment for a real district, NGO, or government
+            body would be provisioned with its own database and would follow this same policy for
+            the real data it holds.
           </p>
         </section>
         <section>
@@ -117,11 +123,11 @@ export default function PrivacyPage() {
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>
-              <strong>Data controller:</strong> on this public demo instance, WaterPoint Board Uganda
-              (operated by Perez Chris) is the data controller for demo/account data only — see the
+              <strong>Data controller:</strong> on this public instance, WaterPoint Board Uganda
+              (operated by Perez Chris) is the data controller for account and report data — see the
               contact icons in the footer. <em>A real production deployment for an actual district,
               NGO, or government body must register its own named data controller with NITA-U and
-              update this notice accordingly</em> — this is a demo-scale placeholder, not a
+              update this notice accordingly</em> — this notice is a starting point, not a
               substitute for that registration.
             </li>
             <li>
@@ -135,7 +141,7 @@ export default function PrivacyPage() {
               processing. See &ldquo;Your rights&rdquo; above for how to make a request.
             </li>
             <li>
-              <strong>Cross-border storage:</strong> this demo instance is hosted on infrastructure
+              <strong>Cross-border storage:</strong> this instance is hosted on infrastructure
               (Vercel, Neon) that may store data outside Uganda. A real deployment should confirm
               its hosting provider and region meet the DPPA&rsquo;s cross-border transfer
               requirements before going live with real personal data.

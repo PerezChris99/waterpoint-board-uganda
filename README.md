@@ -4,18 +4,19 @@
 Prisma, and PostgreSQL, deployed on Vercel.
 
 [![CI](https://github.com/PerezChris99/waterpoint-board-uganda/actions/workflows/ci.yml/badge.svg)](https://github.com/PerezChris99/waterpoint-board-uganda/actions/workflows/ci.yml)
-[![Live demo](https://img.shields.io/badge/demo-waterpointboarduganda.vercel.app-2f7ec2)](https://waterpointboarduganda.vercel.app)
+[![Live instance](https://img.shields.io/badge/live-waterpointboarduganda.vercel.app-2f7ec2)](https://waterpointboarduganda.vercel.app)
 [![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 
-**Live demo:** [waterpointboarduganda.vercel.app](https://waterpointboarduganda.vercel.app)
+**Live instance:** [waterpointboarduganda.vercel.app](https://waterpointboarduganda.vercel.app)
 
-> **Scope note:** This project is on a production-readiness track — the goal is a real
-> community water-point transparency and reporting tool for rural/peri-urban Uganda, positioned to
-> complement (never replace) National Water and Sewerage Corporation (NWSC) billing/network
-> operations and the Ministry of Water and Environment's water-point data collection. It is **not**
-> a drinking-water certification platform, a contamination-detection tool, or an official
-> government system, and currently ships with fictional, deterministic seed data — real deployment
-> requires the institutional validation and data-governance steps in
+> **Scope note:** This project is a production-ready community water-point transparency and
+> reporting platform for rural/peri-urban Uganda, positioned to complement (never replace)
+> National Water and Sewerage Corporation (NWSC) billing/network operations and the Ministry of
+> Water and Environment's water-point data collection. It is **not** a drinking-water
+> certification platform, a contamination-detection tool, or an official government system. The
+> publicly hosted instance currently runs on a placeholder demonstration dataset while real,
+> verified water-point data is onboarded — real deployment also requires the institutional
+> validation and data-governance steps in
 > [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md). See also
 > [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
@@ -24,8 +25,8 @@ Prisma, and PostgreSQL, deployed on Vercel.
 ## What it does
 
 WaterPoint Board Uganda tracks the operational status of community water points — boreholes,
-shallow wells, protected springs, tap stands, and rainwater tanks — for one small, fictional
-Ugandan community. It models a realistic end-to-end workflow:
+shallow wells, protected springs, tap stands, and rainwater tanks — spread across real Ugandan
+towns and cities nationwide. It models a realistic end-to-end workflow:
 
 - **Anyone** can browse the public directory and search/filter water points by status, type, or
   village.
@@ -49,7 +50,7 @@ Ugandan community. It models a realistic end-to-end workflow:
 | 🛡️ Security | CSP + security headers, input validation on every endpoint, per-IP rate limiting, audit logging |
 | ♿ Accessibility | Skip-to-content link, semantic HTML/ARIA labeling, reduced-motion support, keyboard-navigable forms |
 | 🔎 SEO | Metadata API, sitemap/robots, OpenGraph & Twitter cards |
-| 🌱 Seed data | 62 fictional water points, 24 users, hundreds of reports/maintenance logs — deterministic and idempotent |
+| 🌱 Seed data | 153 placeholder water points, 24 users, hundreds of reports/maintenance logs — deterministic and idempotent, pending real verified data |
 
 ## Tech stack
 
@@ -107,15 +108,16 @@ waterpoint-board-uganda/
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local   # fill in DATABASE_URL and JWT_SECRET
+cp .env.example .env.local   # fill in DATABASE_URL, JWT_SECRET, and SEED_ADMIN_EMAIL/PASSWORD
 npx prisma generate
 npx prisma db push
 npm run db:seed
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000). Log in with a seeded demo account —
-see [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for credentials.
+Then open [http://localhost:3000](http://localhost:3000). Log in with the private admin
+credentials you set as `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` — see
+[docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for how seeded accounts work.
 
 ### Test commands
 

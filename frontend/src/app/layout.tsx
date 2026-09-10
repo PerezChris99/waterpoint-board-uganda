@@ -27,11 +27,11 @@ export const metadata: Metadata = {
     template: "%s · WaterPoint Board Uganda",
   },
   description:
-    "Community-reported water-point status and maintenance tracking for one small Ugandan community — a full-stack demonstration project.",
+    "Community-reported water-point status and maintenance tracking for rural and peri-urban Uganda.",
   openGraph: {
     title: "WaterPoint Board Uganda",
     description:
-      "Community-reported water-point status and maintenance tracking for one small Ugandan community.",
+      "Community-reported water-point status and maintenance tracking for rural and peri-urban Uganda.",
     url: siteUrl,
     siteName: "WaterPoint Board Uganda",
     locale: "en_UG",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "WaterPoint Board Uganda",
     description:
-      "Community-reported water-point status and maintenance tracking for one small Ugandan community.",
+      "Community-reported water-point status and maintenance tracking for rural and peri-urban Uganda.",
   },
 };
 
