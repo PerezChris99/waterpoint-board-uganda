@@ -14,7 +14,7 @@ const TONE_COLORS: Record<string, string> = {
 };
 
 // Free vector-tile style, no API key, no rate limits — see https://openfreemap.org
-const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+const STYLE_URL = process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/liberty";
 // Free public OSRM demo server — road-network-accurate routing, no API key.
 // Light-use only; document as a scale limitation (see docs/SECURITY.md).
 const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
@@ -62,10 +62,10 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
   const drawRoute = useCallback(async (from: { lat: number; lng: number }, to: MapWaterPoint) => {
     const map = mapRef.current;
     if (!map) return;
-    setRoutingId(to.id);
+    if (!ROUTING_URL) {\n      setRouteError("Directions are not configured for this deployment.");\n      return;\n    }\n    setRoutingId(to.id);
     setRouteError(null);
     try {
-      const url = `${OSRM_URL}/${from.lng},${from.lat};${to.longitude},${to.latitude}?overview=full&geometries=geojson`;
+      const url = `${ROUTING_URL}/${from.lng},${from.lat};${to.longitude},${to.latitude}?overview=full&geometries=geojson`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Routing service unavailable right now");
       const data = await res.json();
@@ -268,7 +268,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
           <p style="font-weight:600;margin:0 0 2px">${props.name}</p>
           <p style="font-size:12px;color:#666;margin:0 0 8px">${props.code} · ${props.village}</p>
           <button type="button" data-directions style="font-size:12px;font-weight:600;color:#2f7ec2;background:none;border:none;padding:0;cursor:pointer;">
-            Get directions from my location
+            ${ROUTING_URL ? "Get directions from my location" : "Directions unavailable"}
           </button>
         `;
         popupNode.querySelector("[data-directions]")?.addEventListener("click", () => {
