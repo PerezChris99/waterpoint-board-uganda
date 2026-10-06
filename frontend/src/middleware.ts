@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifySessionToken } from "@/lib/jwt";
 import { SESSION_COOKIE } from "@/lib/session";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 const ROLE_PREFIXES: Record<string, string[]> = {
   "/dashboard/security": ["ADMIN", "CARETAKER", "MEMBER"],
@@ -11,6 +12,26 @@ const ROLE_PREFIXES: Record<string, string[]> = {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api/") && !pathname.startsWith("/api/health") && !pathname.startsWith("/api/cron/")) {
+    const scope = pathname.startsWith("/api/auth/") ? "auth" : "api";
+    const limit = scope === "auth" ? RATE_LIMITS.auth : RATE_LIMITS.api;
+    const result = await checkRateLimit(request, scope, limit);
+
+    if (!result.allowed) {
+      return NextResponse.json(
+        { error: { message: "Too many requests. Please retry later." } },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(result.retryAfter),
+            "Cache-Control": "no-store",
+          },
+        },
+      );
+    }
+  }
+
   const requiredRoles = Object.entries(ROLE_PREFIXES).find(([prefix]) =>
     pathname.startsWith(prefix),
   )?.[1];
@@ -34,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/api/:path*"],
 };

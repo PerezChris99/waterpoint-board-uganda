@@ -24,7 +24,9 @@
     "db:baseline:production": "prisma migrate resolve --applied 00000000000000_initial",
     "db:seed": "tsx prisma/seed.ts",
     "db:import-real-water-points": "tsx prisma/import-real-water-points.ts",
-    "vercel-build": "prisma migrate deploy && next build"
+    "vercel-build": "prisma migrate deploy && next build",
+    "test:production": "node ../scripts/verify-production.mjs",
+    "load:test": "k6 run ../tests/load/waterpoint-api.js"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
