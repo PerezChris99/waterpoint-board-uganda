@@ -71,3 +71,5 @@ The software may not claim that external datasets are verified field truth. Impo
 
 
 Dependency maintenance is automated in CI and high/critical known advisories are treated as release blockers.
+
+Dependency remediation is tested against the lockfile before promotion.
