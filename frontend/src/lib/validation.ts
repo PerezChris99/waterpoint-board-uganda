@@ -81,4 +81,6 @@ export const waterPointQuerySchema = z.object({
     .optional(),
   village: z.string().trim().max(100).optional(),
   q: z.string().trim().max(200).optional(),
+  cursor: z.string().cuid().optional(),
+  limit: z.coerce.number().int().min(1).max(500).default(100),
 });
