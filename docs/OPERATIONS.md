@@ -45,7 +45,11 @@ A nationwide deployment must have:
 6. a named operational owner;
 7. a disaster-recovery environment or documented rebuild procedure.
 
-The repository cannot truthfully claim these infrastructure controls are complete because they depend on the selected hosting/database accounts.
+The repository cannot truthfully claim these infrastructure controls are complete because they depend on the selected hosting/database accounts. The codebase provides migration deployment, production health checks, and a documented restore/runbook boundary; PITR, independent backups, restore drills, and DR infrastructure must be evidenced by the operator.
+
+## Rate limiting
+
+Production API traffic is protected by the Upstash-backed middleware limiter. General API routes allow 60 requests/minute/IP and authentication routes allow 10 requests/minute/IP. The production default is fail-closed when the rate-limit store is unavailable or unconfigured. Health and authenticated cron endpoints are excluded because they have their own controls.
 
 ## Monitoring
 
