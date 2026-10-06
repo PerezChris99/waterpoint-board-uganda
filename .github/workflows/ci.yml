@@ -5,6 +5,14 @@ on:
     branches: [perez, main]
   push:
     branches: [perez, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   frontend:
@@ -33,6 +41,7 @@ jobs:
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       SEED_ADMIN_EMAIL: ci-admin@waterpointboard.example
       SEED_ADMIN_PASSWORD: ci-only-seed-password-not-real-32chars
+      RATE_LIMIT_FAIL_CLOSED: "false"
     steps:
       - uses: actions/checkout@v4
 
@@ -45,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Formatting check
+        run: npm run format:check
+
       - name: Lint
         run: npm run lint
 
@@ -54,8 +66,11 @@ jobs:
       - name: Unit tests
         run: npm run test
 
-      - name: Push Prisma schema to test database
-        run: npx prisma db push
+      - name: Coverage
+        run: npm run test:coverage
+
+      - name: Apply database migrations
+        run: npm run db:migrate:deploy
 
       - name: Seed test database
         run: npm run db:seed
@@ -63,6 +78,17 @@ jobs:
       - name: Production build
         run: npm run build
 
-      - name: Dependency audit
-        run: npm audit --audit-level=high
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Full dependency audit
+        run: npm audit --audit-level=high --json > audit.json
         continue-on-error: true
+
+      - name: Upload dependency audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit
+          path: frontend/audit.json
+          retention-days: 14
