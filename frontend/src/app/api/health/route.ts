@@ -19,7 +19,7 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
     const databaseLatencyMs = Math.round((performance.now() - started) * 100) / 100;
-    const ready = missingProductionControls.length === 0;
+    const ready = missingProductionControls.length === 0;\n    if (!ready) console.warn("Production controls incomplete", { missing: missingProductionControls });
 
     return NextResponse.json(
       {
@@ -27,7 +27,7 @@ export async function GET() {
         version: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
         database: { status: "ok", latencyMs: databaseLatencyMs },
         productionControls: ready ? "configured" : "incomplete",
-        ...(ready ? {} : { missingControls: missingProductionControls }),
+
         time: new Date().toISOString(),
       },
       { status: ready ? 200 : 503, headers: { "Cache-Control": "no-store" } },
