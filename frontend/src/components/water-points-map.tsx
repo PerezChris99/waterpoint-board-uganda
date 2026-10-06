@@ -153,7 +153,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
     });
     geolocate.on("error", (err: GeolocateErrorEvent) => {
       setLocationError(
-        err.error?.code === 1
+        err.code === 1
           ? "Location access was denied. Allow location access in your browser to see water points near you."
           : "Couldn't determine your location. Try again.",
       );
