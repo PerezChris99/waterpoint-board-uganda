@@ -121,7 +121,7 @@ model User {
   phone               String?
   // Bumped on logout and on role changes so a previously-issued JWT (which embeds the value at
   // sign time) is rejected by requireRole() even though the token itself hasn't expired yet.
-  tokenVersion        Int              @default(0)
+  tokenVersion        Int              @default(0)\n  mfaEnabled          Boolean          @default(false)\n  mfaSecretEncrypted  String?
   // Scopes an ADMIN/CARETAKER to a single managing Organization; null means platform-wide
   // access (super-admin) or unassociated demo data. See Organization above.
   organizationId      String?
