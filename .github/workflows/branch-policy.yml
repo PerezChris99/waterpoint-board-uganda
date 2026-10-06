@@ -1,0 +1,28 @@
+name: Branch policy
+
+on:
+  pull_request:
+    branches: [perez, main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce release flow
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          if [ "$BASE" = "main" ] && [ "$HEAD" != "perez" ]; then
+            echo "Only perez may promote changes into main."
+            exit 1
+          fi
+          if [ "$BASE" = "perez" ] && [[ "$HEAD" != chore/* && "$HEAD" != feature/* && "$HEAD" != fix/* && "$HEAD" != security/* && "$HEAD" != perf/* && "$HEAD" != refactor/* ]]; then
+            echo "Changes entering perez must use an approved feature/fix/security/chore/perf/refactor branch."
+            exit 1
+          fi
+          echo "Branch policy passed: $HEAD -> $BASE"
