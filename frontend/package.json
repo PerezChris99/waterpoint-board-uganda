@@ -2,9 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": {"node": ">=22"},
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,13 +16,14 @@
     "test:coverage": "vitest run --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
+    "db:baseline:production": "prisma migrate resolve --applied 00000000000000_initial",
     "db:seed": "tsx prisma/seed.ts",
     "db:import-real-water-points": "tsx prisma/import-real-water-points.ts"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
+  "prisma": {"seed": "tsx prisma/seed.ts"},
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
