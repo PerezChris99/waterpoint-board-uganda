@@ -66,6 +66,7 @@
     "vitest": "^4.1.11"
   },
   "overrides": {
-    "deepmerge-ts": "^8.0.2"
+    "deepmerge-ts": "^8.0.2",
+    "braces": "file:vendor/braces"
   }
 }
