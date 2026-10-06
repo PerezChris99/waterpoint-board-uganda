@@ -97,33 +97,27 @@ waterpoint-board-uganda/
 
 ### Prerequisites
 
-- Node.js ≥ 22
-- A reachable PostgreSQL database (a free [Neon](https://neon.tech) branch works great — Docker
-  is not required)
-
-### Setup
+- Node.js 24
+- A reachable PostgreSQL database
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local   # fill in DATABASE_URL, JWT_SECRET, and SEED_ADMIN_EMAIL/PASSWORD
+cp .env.example .env.local
+# Fill in DATABASE_URL, JWT_SECRET and a real operator email/password:
+# SEED_ADMIN_EMAIL=your-real-email
+# SEED_ADMIN_PASSWORD=a-private-password-of-16+-characters
 npx prisma generate
-npx prisma db push
+npm run db:migrate
 npm run db:seed
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000). Log in with the private admin
-credentials you set as `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` — see
-[docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for how seeded accounts work.
+The seed is **not a demo-data generator**. It retrieves real Uganda water-point records from the Water Point Data Exchange (WPDx), validates coordinates and administrative fields, preserves source identifiers, and marks old functionality observations as NEEDS_VERIFICATION. It creates no fictional water points, coordinates, phone numbers, organisations, reports, or maintenance events. The only account it can create is the real operator account supplied through SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD.
 
-To populate real water point data (as run against the live deployment) instead of the fictional
-seed, run `npm run db:import-real-water-points` — it imports ~98,700 real Uganda water points
-from the open Water Point Data Exchange and removes any placeholder (`WP-###`) seed points. See
-[docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) for the data provenance and honesty policy
-behind that import.
+For the authoritative national operational baseline, reconcile WPDx records with the Ministry of Water and Environment's WEMIS/WASMIS records and the responsible District Water Officers before commissioning the system nationally. See [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
-### Test commands
+## Test commands
 
 ```bash
 npm run lint
