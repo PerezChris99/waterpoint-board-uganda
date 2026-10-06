@@ -1,0 +1,39 @@
+name: Production load test
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Production base URL to test"
+        required: true
+        type: string
+      vus:
+        description: "Concurrent virtual users"
+        required: false
+        default: "20"
+        type: string
+      duration:
+        description: "Test duration"
+        required: false
+        default: "2m"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  load-test:
+    name: National API load test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run load test
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          VUS: ${{ inputs.vus }}
+          DURATION: ${{ inputs.duration }}
+        run: k6 run tests/load/waterpoint-api.js
