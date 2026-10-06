@@ -10,16 +10,21 @@ export async function GET() {
     ? [
         !process.env.DATABASE_URL ? "DATABASE_URL" : null,
         !process.env.JWT_SECRET ? "JWT_SECRET" : null,
-        !process.env.AUDIT_HMAC_SECRET ? "AUDIT_HMAC_SECRET" : null,\n        !process.env.MFA_ENCRYPTION_KEY ? "MFA_ENCRYPTION_KEY" : null,
+        !process.env.AUDIT_HMAC_SECRET ? "AUDIT_HMAC_SECRET" : null,
+        !process.env.MFA_ENCRYPTION_KEY ? "MFA_ENCRYPTION_KEY" : null,
         !process.env.UPSTASH_REDIS_REST_URL ? "UPSTASH_REDIS_REST_URL" : null,
-        !process.env.UPSTASH_REDIS_REST_TOKEN ? "UPSTASH_REDIS_REST_TOKEN" : null,\n        !process.env.CRON_SECRET ? "CRON_SECRET" : null,\n        !process.env.RESEND_API_KEY ? "RESEND_API_KEY" : null,\n        !process.env.NOTIFICATIONS_FROM_EMAIL ? "NOTIFICATIONS_FROM_EMAIL" : null,
+        !process.env.UPSTASH_REDIS_REST_TOKEN ? "UPSTASH_REDIS_REST_TOKEN" : null,
+        !process.env.CRON_SECRET ? "CRON_SECRET" : null,
+        !process.env.RESEND_API_KEY ? "RESEND_API_KEY" : null,
+        !process.env.NOTIFICATIONS_FROM_EMAIL ? "NOTIFICATIONS_FROM_EMAIL" : null,
       ].filter((value): value is string => value !== null)
     : [];
 
   try {
     await prisma.$queryRaw`SELECT 1`;
     const databaseLatencyMs = Math.round((performance.now() - started) * 100) / 100;
-    const ready = missingProductionControls.length === 0;\n    if (!ready) console.warn("Production controls incomplete", { missing: missingProductionControls });
+    const ready = missingProductionControls.length === 0;
+    if (!ready) console.warn("Production controls incomplete", { missing: missingProductionControls });
 
     return NextResponse.json(
       {
