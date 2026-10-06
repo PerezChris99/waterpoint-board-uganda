@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import * as maplibregl from "maplibre-gl";
-import { type GeoJSONSource, type Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
+import {
+  type GeoJSONSource,
+  type GeolocateErrorEvent,
+  type GeolocatePositionEvent,
+  type Map as MapLibreMap,
+  type MapLayerMouseEvent,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { STATUS_TONE } from "@/lib/labels";
 import type { WaterPointStatus } from "@prisma/client";
@@ -140,12 +146,12 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
     });
     map.addControl(geolocate, "top-right");
 
-    geolocate.on("geolocate", (position: GeolocationPosition) => {
+    geolocate.on("geolocate", (position: GeolocatePositionEvent) => {
       setLocationError(null);
       setLocationAccuracy(position.coords.accuracy);
       setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
     });
-    geolocate.on("error", (err: GeolocationPositionError) => {
+    geolocate.on("error", (err: GeolocateErrorEvent) => {
       setLocationError(
         err.code === err.PERMISSION_DENIED
           ? "Location access was denied. Allow location access in your browser to see water points near you."
