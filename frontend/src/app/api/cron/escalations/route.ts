@@ -20,7 +20,7 @@ import { ISSUE_LABELS } from "@/lib/labels";
  * which safely no-op if no provider is configured — so running this cron unconfigured is
  * harmless and just logs what it would have sent.
  */
-export const dynamic = "force-dynamic";\n\nexport async function GET(request: Request) {
+export const dynamic = "force-dynamic";\nexport const maxDuration = 300;\n\nexport async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
