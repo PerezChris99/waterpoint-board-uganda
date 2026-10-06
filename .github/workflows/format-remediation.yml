@@ -27,7 +27,7 @@ jobs:
       - run: npm ci
       - name: Format changed source files
         run: |
-          files=$(git diff --name-only origin/perez...HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' '*.css' '*.md' | grep -v '^vendor/' || true)
+          files=$(git diff --name-only origin/perez...HEAD -- 'frontend/*.ts' 'frontend/*.tsx' 'frontend/*.js' 'frontend/*.jsx' 'frontend/*.json' 'frontend/*.css' 'frontend/*.md' 'frontend/src/**' 'frontend/prisma/**' | sed 's#^frontend/##' | grep -v '^vendor/' || true)
           if [ -n "$files" ]; then
             printf '%s\n' "$files" | xargs npx prettier --write
           fi
