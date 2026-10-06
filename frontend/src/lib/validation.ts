@@ -10,6 +10,7 @@ export const registerSchema = z.object({
     .regex(/[a-z]/, "Password must include a lowercase letter")
     .regex(/[A-Z]/, "Password must include an uppercase letter")
     .regex(/[0-9]/, "Password must include a digit"),
+  district: z.string().trim().max(100).optional(),
   village: z.string().trim().max(100).optional(),
 });
 
