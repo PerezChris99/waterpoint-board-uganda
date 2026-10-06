@@ -86,9 +86,10 @@ export async function rateLimit(key: string, limit: number, windowMs: number): P
     try {
       return await rateLimitRedis(key, limit, windowMs, url, token);
     } catch (error) {
-      // Fail open to the in-memory limiter rather than failing the request entirely — a
-      // temporarily unreachable Redis shouldn't take down login/reporting.
-      console.error("Upstash rate limit request failed, falling back to in-memory limiter", error);
+      console.error("Upstash rate limit request failed", error);
+      if (process.env.NODE_ENV === "production" && process.env.RATE_LIMIT_FAIL_CLOSED === "true") {
+        return { allowed: false, remaining: 0, resetAt: Date.now() + 60_000 };
+      }
       return rateLimitMemory(key, limit, windowMs);
     }
   }
