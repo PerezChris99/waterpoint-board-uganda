@@ -21,7 +21,7 @@ export const options = {
 export default function () {
   const responses = [
     http.get(`${BASE_URL}/api/water-points`),
-    http.get(`${BASE_URL}/api/analytics`),
+    http.get(`${BASE_URL}/api/health`),
   ];
 
   responses.forEach((response) => {
