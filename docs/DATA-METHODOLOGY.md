@@ -45,13 +45,19 @@ alongside a caretaker's own update or a community report.
 Re-running the import (`npm run db:import-real-water-points`) is idempotent: it re-derives the
 same water points from WPDx and only adds ones not already present by their WPDx ID.
 
-## Development/test seed data
+## Development and production seed data
 
-Separately from the real data above, `npm run db:seed` still populates a small, fixed,
-deterministic **fictional** dataset (153 water points, 24 users, hundreds of reports/maintenance
-logs) used only for local development and CI test runs — it is never run against the live
-deployment. Login credentials for any seeded accounts are environment-configured and private to
-the operator, not published.
+The seed script (`frontend/prisma/seed.ts`) is not a synthetic demo-data generator.
+
+It retrieves Uganda water-point records from WPDx, preserves source identifiers, coordinates and administrative fields after Uganda-boundary validation, excludes non-fixed water sources, and treats functionality observations older than 2016 as `NEEDS_VERIFICATION` rather than current facts. Imported records carry `verificationMethod = EXTERNAL_DATASET` and the original report date.
+
+The only user created by the seed is the real operator account supplied through `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD`. No fabricated water points, organisations, reports, maintenance events, coordinates or credentials are generated.
+
+The seed is additive by default. `SEED_RESET_WATER_POINTS=true` is a deliberate destructive option for disposable/rebuild environments only.
+
+National commissioning still requires reconciliation with Ministry of Water and Environment WEMIS/WASMIS records and validation by responsible District Water Officers.
+
+`npm run db:import-real-water-points` remains available as an explicit WPDx bulk-import command.
 
 ## Statuses
 
