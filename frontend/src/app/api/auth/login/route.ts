@@ -5,6 +5,7 @@ import { createSessionCookie } from "@/lib/session";
 import { loginSchema } from "@/lib/validation";
 import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
+import { decryptMfaSecret, verifyTotp } from "@/lib/mfa";
 
 export async function POST(request: Request) {
   const limit = await rateLimit(`login:${clientIpFrom(request)}`, 10, 15 * 60 * 1000);
@@ -22,6 +23,8 @@ export async function POST(request: Request) {
   }
 
   const { email, password } = parsed.data;
+  const rawBody = body as { otp?: unknown } | null;
+  const otp = typeof rawBody?.otp === "string" ? rawBody.otp : "";
 
   // Secondary, account-scoped limit: catches credential-stuffing spread across many IPs
   // against one specific account, which the IP-only limit above can't see.
@@ -40,6 +43,15 @@ export async function POST(request: Request) {
 
   if (!user || !validPassword) {
     return NextResponse.json({ error: { message: "Invalid email or password" } }, { status: 401 });
+  }
+
+  if (user.mfaEnabled) {
+    if (!otp || !user.mfaSecretEncrypted) {
+      return NextResponse.json({ error: { message: "Authenticator code required" }, code: "MFA_REQUIRED" }, { status: 401 });
+    }
+    if (!verifyTotp(decryptMfaSecret(user.mfaSecretEncrypted), otp)) {
+      return NextResponse.json({ error: { message: "Invalid authenticator code" }, code: "MFA_INVALID" }, { status: 401 });
+    }
   }
 
   await createSessionCookie({

@@ -1,0 +1,11 @@
+* @PerezChris99
+
+frontend/src/lib/auth* @PerezChris99
+frontend/src/lib/jwt.ts @PerezChris99
+frontend/src/lib/session.ts @PerezChris99
+frontend/src/lib/rbac.ts @PerezChris99
+frontend/src/lib/rate-limit.ts @PerezChris99
+frontend/src/app/api/admin/ @PerezChris99
+frontend/src/app/api/auth/ @PerezChris99
+frontend/prisma/ @PerezChris99
+.github/workflows/ @PerezChris99

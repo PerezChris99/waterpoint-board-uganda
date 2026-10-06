@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -18,9 +18,13 @@
     "test:coverage": "vitest run --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
+    "db:baseline:production": "prisma migrate resolve --applied 00000000000000_initial",
     "db:seed": "tsx prisma/seed.ts",
-    "db:import-real-water-points": "tsx prisma/import-real-water-points.ts"
+    "db:import-real-water-points": "tsx prisma/import-real-water-points.ts",
+    "vercel-build": "prisma migrate deploy && next build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -30,8 +34,8 @@
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.4.0",
     "jose": "^6.2.10",
-    "maplibre-gl": "^5.24.0",
-    "next": "16.3.3",
+    "maplibre-gl": "^6.12.0",
+    "next": "^16.3.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
@@ -50,8 +54,9 @@
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9",
-    "eslint-config-next": "16.3.3",
+    "eslint-config-next": "^16.3.6",
     "eslint-config-prettier": "^10.1.8",
+    "fill-range": "^7.1.1",
     "jest-axe": "^11.0.0",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
@@ -60,5 +65,9 @@
     "tsx": "^4.23.12",
     "typescript": "^5",
     "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "braces": "file:vendor/braces"
   }
 }

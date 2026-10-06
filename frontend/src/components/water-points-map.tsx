@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import maplibregl, { type Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import {
+  type GeoJSONSource,
+  type GeolocateErrorEvent,
+  type GeolocatePositionEvent,
+  type Map as MapLibreMap,
+  type MapLayerMouseEvent,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { STATUS_TONE } from "@/lib/labels";
 import type { WaterPointStatus } from "@prisma/client";
@@ -14,10 +21,9 @@ const TONE_COLORS: Record<string, string> = {
 };
 
 // Free vector-tile style, no API key, no rate limits — see https://openfreemap.org
-const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
-// Free public OSRM demo server — road-network-accurate routing, no API key.
-// Light-use only; document as a scale limitation (see docs/SECURITY.md).
-const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
+const STYLE_URL = process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/liberty";
+// Routing is optional and deployment-configurable. A public demo routing service is never used as a production default.
+const ROUTING_URL = process.env.NEXT_PUBLIC_ROUTING_URL?.replace(/\/$/, "");
 
 export interface MapWaterPoint {
   id: string;
@@ -62,10 +68,14 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
   const drawRoute = useCallback(async (from: { lat: number; lng: number }, to: MapWaterPoint) => {
     const map = mapRef.current;
     if (!map) return;
+    if (!ROUTING_URL) {
+      setRouteError("Directions are not configured for this deployment.");
+      return;
+    }
     setRoutingId(to.id);
     setRouteError(null);
     try {
-      const url = `${OSRM_URL}/${from.lng},${from.lat};${to.longitude},${to.latitude}?overview=full&geometries=geojson`;
+      const url = `${ROUTING_URL}/${from.lng},${from.lat};${to.longitude},${to.latitude}?overview=full&geometries=geojson`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Routing service unavailable right now");
       const data = await res.json();
@@ -136,14 +146,14 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
     });
     map.addControl(geolocate, "top-right");
 
-    geolocate.on("geolocate", (position: GeolocationPosition) => {
+    geolocate.on("geolocate", (position: GeolocatePositionEvent) => {
       setLocationError(null);
       setLocationAccuracy(position.coords.accuracy);
       setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
     });
-    geolocate.on("error", (err: GeolocationPositionError) => {
+    geolocate.on("error", (err: GeolocateErrorEvent) => {
       setLocationError(
-        err.code === err.PERMISSION_DENIED
+        err.code === 1
           ? "Location access was denied. Allow location access in your browser to see water points near you."
           : "Couldn't determine your location. Try again.",
       );
@@ -226,7 +236,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
         },
       });
 
-      map.on("click", "water-points-clusters", async (e) => {
+      map.on("click", "water-points-clusters", async (e: MapLayerMouseEvent) => {
         const feature = e.features?.[0];
         if (!feature) return;
         const clusterId = (feature.properties as { cluster_id: number }).cluster_id;
@@ -257,7 +267,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
         map.getCanvas().style.cursor = "";
       });
 
-      map.on("click", "water-points-circle", (e) => {
+      map.on("click", "water-points-circle", (e: MapLayerMouseEvent) => {
         const feature = e.features?.[0];
         if (!feature) return;
         const props = feature.properties as { id: string; name: string; code: string; village: string };
@@ -268,7 +278,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
           <p style="font-weight:600;margin:0 0 2px">${props.name}</p>
           <p style="font-size:12px;color:#666;margin:0 0 8px">${props.code} · ${props.village}</p>
           <button type="button" data-directions style="font-size:12px;font-weight:600;color:#2f7ec2;background:none;border:none;padding:0;cursor:pointer;">
-            Get directions from my location
+            ${ROUTING_URL ? "Get directions from my location" : "Directions unavailable"}
           </button>
         `;
         popupNode.querySelector("[data-directions]")?.addEventListener("click", () => {

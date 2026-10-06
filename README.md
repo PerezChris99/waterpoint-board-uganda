@@ -9,16 +9,12 @@ Prisma, and PostgreSQL, deployed on Vercel.
 
 **Live instance:** [waterpointboarduganda.vercel.app](https://waterpointboarduganda.vercel.app)
 
-> **Scope note:** This project is a production-ready community water-point transparency and
+> **Scope note:** This project is engineered as a national-scale community water-point transparency and
 > reporting platform for rural/peri-urban Uganda, positioned to complement (never replace)
 > National Water and Sewerage Corporation (NWSC) billing/network operations and the Ministry of
 > Water and Environment's water-point data collection. It is **not** a drinking-water
 > certification platform, a contamination-detection tool, or an official government system. The
-> publicly hosted instance's ~98,700 water points are real, imported from the open Water Point
-> Data Exchange — real deployment for a specific district/NGO/government body also requires the
-> institutional validation and data-governance steps in
-> [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md). See also
-> [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
+> publicly hosted instance's ~98,700 water points are real, imported from the open Water Point Data Exchange. The software is designed for national-scale use, but the public demo is not itself an official government service and does not claim government certification, an availability SLA, completed disaster-recovery testing, or institutional approval. A real national deployment requires the infrastructure, security assessment, data-governance, identity, backup, operational, and field-validation controls documented in [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md) and [docs/OPERATIONS.md](docs/OPERATIONS.md). See also [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
 ---
 
@@ -92,6 +88,7 @@ waterpoint-board-uganda/
 │       ├── components/         shared UI (nav, forms, charts)
 │       ├── lib/                db, auth, validation, rbac, rate-limit, audit
 │       └── middleware.ts       Edge route protection
+├── .github/                  CI, security scanning, ownership and dependency automation
 ├── docs/                      Architecture, API, security, deployment, data methodology, etc.
 └── .github/workflows/ci.yml   Lint, typecheck, test, build
 ```
@@ -137,7 +134,7 @@ npm run build
 
 ## Deployment
 
-Deployed on Vercel with a Neon Postgres database — see
+Deployed on Vercel with a Neon Postgres database. Production uses versioned Prisma migrations, distributed rate limiting, security scanning, and controlled release gates — see
 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full step-by-step guide (env vars, schema push,
 seeding, and verification).
 
@@ -152,6 +149,7 @@ seeding, and verification).
 | [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) | Real water point data provenance, dev/test seed data, what this platform does *not* do |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Vercel + Neon deployment guide |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Branch workflow, PR checklist |
+| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Nationwide operations, recovery, governance and honesty policy |
 | [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) | Phase-by-phase build log |
 | [docs/DESIGN_BLUEPRINT.md](docs/DESIGN_BLUEPRINT.md) | Design/implementation standard followed for all UI work |
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | Notable changes |
