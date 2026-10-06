@@ -31,13 +31,11 @@ hardcoded credential (see [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)):
 ```bash
 cd frontend
 npm install
-npx prisma db push
+npm run db:migrate:deploy
 npm run db:seed
 ```
 
-This creates all tables and loads the fixed, deterministic placeholder dataset (see
-[DATA-METHODOLOGY.md](DATA-METHODOLOGY.md)). The seed script is idempotent — re-running it always
-resets to the same 153 water points, 24 users, and historical reports/maintenance logs.
+This applies versioned migrations and loads only real WPDx Uganda water-point records. The seed does not create fictional water points, users, reports, maintenance logs, coordinates or credentials. See [DATA-METHODOLOGY.md](DATA-METHODOLOGY.md).
 
 ### 4. Deploy
 
@@ -97,7 +95,7 @@ itself to work. To also get a daily email digest sent to affected caretakers:
 2. Set `CRON_SECRET` to a random secret. `GET /api/cron/escalations` requires
    `Authorization: Bearer <CRON_SECRET>` and returns 401 for anything else, including when the
    variable is unset.
-3. The Vercel Cron schedule is already configured in `frontend/vercel.json`:
+3. The Vercel Cron schedule is configured in `frontend/vercel.json`:
    ```json
    {
      "crons": [{ "path": "/api/cron/escalations", "schedule": "0 6 * * *" }]
