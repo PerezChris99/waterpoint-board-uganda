@@ -79,6 +79,7 @@ export const waterPointQuerySchema = z.object({
   type: z
     .enum(["BOREHOLE", "SHALLOW_WELL", "PROTECTED_SPRING", "TAP_STAND", "RAINWATER_HARVESTING"])
     .optional(),
+  district: z.string().trim().max(100).optional(),
   village: z.string().trim().max(100).optional(),
   q: z.string().trim().max(200).optional(),
   cursor: z.string().cuid().optional(),
