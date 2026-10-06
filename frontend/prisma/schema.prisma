@@ -205,9 +205,11 @@ model AuditLog {
   action     String
   entityType String
   entityId   String?
-  metadata   Json?
-  createdAt  DateTime @default(now())
+  metadata      Json?
+  integrityHash String?
+  createdAt     DateTime @default(now())
 
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([integrityHash])
 }
