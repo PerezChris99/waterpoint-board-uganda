@@ -81,3 +81,5 @@ Formatting is enforced on hardening changes before release promotion.
 Formatting automation is scoped to application source and excludes the vendored security patch.
 
 Final CI validation follows automated formatting.
+
+Routing remains optional until a deployment-owned routing provider with an appropriate SLA is configured.
