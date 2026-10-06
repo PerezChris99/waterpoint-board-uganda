@@ -416,11 +416,15 @@ feature/fix/security/chore/perf/refactor
 
 ---
 
-## License and copyright
+## License, copyright and usage
 
-This project is licensed under the **MIT License**.
+This project and its source code are **fully protected by copyright**.
 
-**Copyright © 2026 PerezChris99.**
+**Copyright © 2026 PerezChris99. All rights reserved except for the rights expressly granted by the applicable license.**
+
+Use, reproduction, modification, distribution or incorporation of this software is permitted **only to the extent authorized by the [LICENSE](LICENSE)**. Any use that falls outside the rights granted by the license requires **prior written permission from the copyright holder**.
+
+The repository currently uses the **MIT License**, which grants broad permissions subject to its stated conditions. The copyright notice remains in force and does not transfer ownership or intellectual property rights.
 
 See [LICENSE](LICENSE) for the complete license text.
 
