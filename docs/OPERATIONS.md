@@ -77,3 +77,5 @@ Dependency remediation is tested against the lockfile before promotion.
 The repository vendors the current patched braces recursion guard because upstream has no released fix for the active advisory; the vendor remains isolated to development tooling and is monitored for replacement by an upstream release.
 
 Formatting is enforced on hardening changes before release promotion.
+
+Formatting automation is scoped to application source and excludes the vendored security patch.
