@@ -1,16 +1,46 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// Lightweight liveness/readiness probe for uptime monitors and load balancers.
-// Forced dynamic: a statically-prerendered health check would freeze its result at build time,
-// permanently masking real outages instead of checking the DB on every request.
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const started = performance.now();
+  const production = process.env.NODE_ENV === "production";
+  const missingProductionControls = production
+    ? [
+        !process.env.DATABASE_URL ? "DATABASE_URL" : null,
+        !process.env.JWT_SECRET ? "JWT_SECRET" : null,
+        !process.env.AUDIT_HMAC_SECRET ? "AUDIT_HMAC_SECRET" : null,
+        !process.env.UPSTASH_REDIS_REST_URL ? "UPSTASH_REDIS_REST_URL" : null,
+        !process.env.UPSTASH_REDIS_REST_TOKEN ? "UPSTASH_REDIS_REST_TOKEN" : null,
+      ].filter((value): value is string => value !== null)
+    : [];
+
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json({ status: "ok", time: new Date().toISOString() });
+    const databaseLatencyMs = Math.round((performance.now() - started) * 100) / 100;
+    const ready = missingProductionControls.length === 0;
+
+    return NextResponse.json(
+      {
+        status: ready ? "ok" : "degraded",
+        version: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
+        database: { status: "ok", latencyMs: databaseLatencyMs },
+        productionControls: ready ? "configured" : "incomplete",
+        ...(ready ? {} : { missingControls: missingProductionControls }),
+        time: new Date().toISOString(),
+      },
+      { status: ready ? 200 : 503, headers: { "Cache-Control": "no-store" } },
+    );
   } catch {
-    return NextResponse.json({ status: "error" }, { status: 503 });
+    return NextResponse.json(
+      {
+        status: "error",
+        version: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
+        database: { status: "error" },
+        time: new Date().toISOString(),
+      },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
   }
 }
