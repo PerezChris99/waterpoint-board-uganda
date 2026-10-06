@@ -19,7 +19,7 @@ export async function GET() {
       prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
       prisma.report.groupBy({ by: ["issueType"], _count: true, where: { moderationStatus: "APPROVED" } }),
       prisma.report.count({ where: { moderationStatus: "APPROVED" } }),
-      prisma.$queryRaw<{ month: Date; value: bigint }>`
+      prisma.$queryRaw<{ month: Date; value: bigint }[]>`
         SELECT date_trunc('month', "createdAt") AS month, COUNT(*)::bigint AS value
         FROM "Report"
         WHERE "moderationStatus" = 'APPROVED' AND "createdAt" >= NOW() - INTERVAL '12 months'
