@@ -41,7 +41,7 @@ resets to the same 153 water points, 24 users, and historical reports/maintenanc
 
 ### 4. Deploy
 
-Push to `main` (or click "Deploy" in the Vercel dashboard). Vercel builds with `next build`;
+Push to `main` only through the protected release workflow. Vercel builds with `next build`;
 `postinstall` runs `prisma generate` automatically so the Prisma Client matches the schema.
 
 ### 5. Verify
@@ -130,16 +130,13 @@ today — see `docs/NWSC-PRODUCTION-STRATEGY.md`.
   the same `PENDING_REVIEW` moderation queue as anonymous web reports, since a phone number alone
   isn't a verified account.
 
-## Shared rate limiting (optional)
+## Shared rate limiting
 
-By default, rate limiting (`src/lib/rate-limit.ts`) is in-memory and scoped to a single warm
-serverless instance — good enough to blunt casual abuse, but not shared across instances under
-real multi-instance production traffic. Set `UPSTASH_REDIS_REST_URL` and
-`UPSTASH_REDIS_REST_TOKEN` (from an [Upstash](https://upstash.com) Redis database's REST API
-credentials) to switch to a shared, cross-instance limiter automatically — no code changes needed,
-and it fails open to the in-memory limiter if Upstash is temporarily unreachable.
 
-## Structured logging / error tracking (optional)
+For production, configure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Set `RATE_LIMIT_FAIL_CLOSED=true` so protected requests fail closed if the distributed limiter is unavailable. The in-memory limiter remains a development fallback only.
+
+## Structured logging / error tracking
+
 
 `src/lib/logger.ts` emits structured JSON log lines (timestamp, level, message, context) for every
 unhandled API error, which Vercel captures from stdout/stderr automatically. To add a real error
