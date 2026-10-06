@@ -68,3 +68,6 @@ The deployment authority must define authoritative ownership for administrative 
 ## Honesty policy
 
 The software may not claim that external datasets are verified field truth. Imported records retain provenance and stale/verification status. Availability, security certification, compliance, backup, and disaster-recovery claims must be backed by actual infrastructure evidence.
+
+
+Dependency maintenance is automated in CI and high/critical known advisories are treated as release blockers.
