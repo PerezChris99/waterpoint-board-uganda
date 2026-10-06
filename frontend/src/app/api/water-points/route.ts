@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   const parsed = waterPointQuerySchema.safeParse({
     status: searchParams.get("status") ?? undefined,
     type: searchParams.get("type") ?? undefined,
+    district: searchParams.get("district") ?? undefined,
     village: searchParams.get("village") ?? undefined,
     q: searchParams.get("q") ?? undefined,
     cursor: searchParams.get("cursor") ?? undefined,
@@ -19,11 +20,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: { message: "Invalid query" } }, { status: 400 });
   }
 
-  const { status, type, village, q, cursor, limit } = parsed.data;
+  const { status, type, district, village, q, cursor, limit } = parsed.data;
   const rows = await prisma.waterPoint.findMany({
     where: {
       status: status ?? undefined,
       type: type ?? undefined,
+      district: district ?? undefined,
       village: village ?? undefined,
       name: q ? { contains: q, mode: "insensitive" } : undefined,
     },
@@ -36,6 +38,7 @@ export async function GET(request: Request) {
       name: true,
       type: true,
       status: true,
+      district: true,
       village: true,
       parish: true,
       latitude: true,
