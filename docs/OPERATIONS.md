@@ -79,3 +79,5 @@ The repository vendors the current patched braces recursion guard because upstre
 Formatting is enforced on hardening changes before release promotion.
 
 Formatting automation is scoped to application source and excludes the vendored security patch.
+
+Final CI validation follows automated formatting.
