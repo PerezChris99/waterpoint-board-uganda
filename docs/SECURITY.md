@@ -57,27 +57,15 @@ is requested if the visitor declines.
 
 ## Rate limiting
 
-An in-memory limiter (`src/lib/rate-limit.ts`) throttles login, registration, and report
-submission per IP.
+Production deployments must use the distributed Upstash Redis limiter and set RATE_LIMIT_FAIL_CLOSED=true. The in-memory limiter is a development fallback and is not considered a nationwide production control. Login is limited both by source IP and normalized account identifier.
 
-### Known limitations
+## Health & readiness
 
-- The rate limiter is **per warm serverless instance**, not distributed. Under real multi-instance
-  production traffic it blunts casual abuse but is not a substitute for an edge/WAF-level control
-  or a shared store (e.g. Upstash Redis) for strict guarantees. Documented here deliberately
-  rather than overstating the protection.
-- `Content-Security-Policy` allows `'unsafe-inline'` for `script-src`/`style-src` because Next.js
-  injects inline hydration data and Tailwind emits inline styles; a stricter nonce-based CSP is a
-  reasonable future hardening step.
-- No error-tracking/APM (e.g. Sentry) is wired up; server errors are only visible in platform logs.
-- `/api/water-points` has a hard `take: 2000` safety cap but no real offset/cursor pagination —
-  fine at current (~150 seed points) scale, worth revisiting before a large real-world rollout.
-- The OSRM public demo routing server (`router.project-osrm.org`) is explicitly documented by
-  its maintainers as light-use/evaluation-only, not a production SLA. At real-world scale this
-  should move to a self-hosted OSRM instance or a paid routing provider. OpenFreeMap's tile
-  service is intended for production use and has no such caveat.
+GET /api/health is dynamic and checks database connectivity plus required production security controls. It returns 503 when production controls are incomplete or the database is unavailable.
 
 ## Audit logging
+
+New audit records carry an HMAC integrity hash using AUDIT_HMAC_SECRET. This is tamper-evident rather than a substitute for an independent immutable audit store. Existing legacy records may have a null integrity hash and must be retained as historical data unless separately migrated.
 
 Sensitive actions (login, registration, role changes, status changes, report status changes,
 maintenance log entries) are recorded in the `AuditLog` table with actor, action, entity, and
@@ -85,7 +73,7 @@ metadata — never with secrets.
 
 ## Dependency scanning
 
-`npm audit` runs in CI (non-blocking) on every pull request.
+CI runs a blocking production dependency audit, dependency review on pull requests, CodeQL, and secret scanning. Full development dependency audit results are retained as CI artifacts. Dependabot is configured for weekly updates.
 
 ## Security audit findings (2026, deep review)
 
