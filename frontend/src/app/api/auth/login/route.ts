@@ -4,7 +4,7 @@ import { verifyPassword, DUMMY_PASSWORD_HASH } from "@/lib/password";
 import { createSessionCookie } from "@/lib/session";
 import { loginSchema } from "@/lib/validation";
 import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
-import { writeAuditLog } from "@/lib/audit";
+import { writeAuditLog } from "@/lib/audit";\nimport { decryptMfaSecret, verifyTotp } from "@/lib/mfa";
 
 export async function POST(request: Request) {
   const limit = await rateLimit(`login:${clientIpFrom(request)}`, 10, 15 * 60 * 1000);
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: { message: "Invalid input" } }, { status: 400 });
   }
 
-  const { email, password } = parsed.data;
+  const { email, password } = parsed.data;\n  const rawBody = body as { otp?: unknown } | null;\n  const otp = typeof rawBody?.otp === "string" ? rawBody.otp : "";
 
   // Secondary, account-scoped limit: catches credential-stuffing spread across many IPs
   // against one specific account, which the IP-only limit above can't see.
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: { message: "Invalid email or password" } }, { status: 401 });
   }
 
-  await createSessionCookie({
+  if (user.mfaEnabled) {\n    if (!otp || !user.mfaSecretEncrypted) {\n      return NextResponse.json({ error: { message: "Authenticator code required" }, code: "MFA_REQUIRED" }, { status: 401 });\n    }\n    if (!verifyTotp(decryptMfaSecret(user.mfaSecretEncrypted), otp)) {\n      return NextResponse.json({ error: { message: "Invalid authenticator code" }, code: "MFA_INVALID" }, { status: 401 });\n    }\n  }\n\n  await createSessionCookie({
     sub: user.id,
     email: user.email,
     name: user.name,
