@@ -83,3 +83,5 @@ Formatting automation is scoped to application source and excludes the vendored 
 Final CI validation follows automated formatting.
 
 Routing remains optional until a deployment-owned routing provider with an appropriate SLA is configured.
+
+Final source formatting is applied before CI promotion.
