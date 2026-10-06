@@ -23,7 +23,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
       - name: Upgrade directly affected packages
-        run: npm install maplibre-gl@6.12.0 next@16.3.6
+        run: npm install maplibre-gl@6.12.0 next@16.3.6 eslint-config-next@16.3.6
       - name: Apply safe transitive security fixes
         run: npm audit fix --package-lock-only
       - name: Verify high and critical vulnerabilities are gone
