@@ -20,14 +20,21 @@ import { ISSUE_LABELS } from "@/lib/labels";
  * which safely no-op if no provider is configured — so running this cron unconfigured is
  * harmless and just logs what it would have sent.
  */
-export const dynamic = "force-dynamic";\nexport const maxDuration = 300;\n\nexport async function GET(request: Request) {
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: { message: "Unauthorized" } }, { status: 401 });
   }
 
-  const now = new Date();\n  await prisma.passwordResetToken.deleteMany({ where: { OR: [{ expiresAt: { lt: now } }, { usedAt: { not: null } }] } });\n\n  const threshold = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);\n  const candidates = await prisma.report.findMany({
+  const now = new Date();
+  await prisma.passwordResetToken.deleteMany({ where: { OR: [{ expiresAt: { lt: now } }, { usedAt: { not: null } }] } });
+
+  const threshold = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+  const candidates = await prisma.report.findMany({
     where: { status: { in: ["OPEN", "ACKNOWLEDGED"] }, createdAt: { lte: threshold } },
     include: {
       waterPoint: { include: { caretaker: { select: { id: true, email: true, phone: true } } } },
