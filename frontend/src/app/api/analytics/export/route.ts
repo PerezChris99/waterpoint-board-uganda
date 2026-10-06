@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireRole, apiErrorResponse, organizationScopeWhere } from "@/lib/rbac";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";\nimport { writeAuditLog } from "@/lib/audit";
 
 function toCsvRow(values: (string | number | null | undefined)[]): string {
   return values
@@ -23,7 +23,7 @@ export async function GET() {
       return NextResponse.json({ error: { message: "Export limit reached. Try again later." } }, { status: 429 });
     }
 
-    const encoder = new TextEncoder();
+    await writeAuditLog({ actorId: session.sub, action: "WATER_POINT_EXPORT", entityType: "WaterPoint" });\n\n    const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         let cursor: string | undefined;
