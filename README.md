@@ -14,11 +14,7 @@ Prisma, and PostgreSQL, deployed on Vercel.
 > National Water and Sewerage Corporation (NWSC) billing/network operations and the Ministry of
 > Water and Environment's water-point data collection. It is **not** a drinking-water
 > certification platform, a contamination-detection tool, or an official government system. The
-> publicly hosted instance's ~98,700 water points are real, imported from the open Water Point
-> Data Exchange — real deployment for a specific district/NGO/government body also requires the
-> institutional validation and data-governance steps in
-> [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md). See also
-> [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
+> publicly hosted instance's ~98,700 water points are real, imported from the open Water Point Data Exchange. The software is designed for national-scale use, but the public demo is not itself an official government service and does not claim government certification, an availability SLA, completed disaster-recovery testing, or institutional approval. A real national deployment requires the infrastructure, security assessment, data-governance, identity, backup, operational, and field-validation controls documented in [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md) and [docs/OPERATIONS.md](docs/OPERATIONS.md). See also [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
 ---
 
