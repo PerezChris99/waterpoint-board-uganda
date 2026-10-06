@@ -15,9 +15,8 @@ const TONE_COLORS: Record<string, string> = {
 
 // Free vector-tile style, no API key, no rate limits — see https://openfreemap.org
 const STYLE_URL = process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/liberty";
-// Free public OSRM demo server — road-network-accurate routing, no API key.
-// Light-use only; document as a scale limitation (see docs/SECURITY.md).
-const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
+// Routing is optional and deployment-configurable. A public demo routing service is never used as a production default.
+const ROUTING_URL = process.env.NEXT_PUBLIC_ROUTING_URL?.replace(/\/$/, "");
 
 export interface MapWaterPoint {
   id: string;
@@ -62,7 +61,11 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
   const drawRoute = useCallback(async (from: { lat: number; lng: number }, to: MapWaterPoint) => {
     const map = mapRef.current;
     if (!map) return;
-    if (!ROUTING_URL) {\n      setRouteError("Directions are not configured for this deployment.");\n      return;\n    }\n    setRoutingId(to.id);
+    if (!ROUTING_URL) {
+      setRouteError("Directions are not configured for this deployment.");
+      return;
+    }
+    setRoutingId(to.id);
     setRouteError(null);
     try {
       const url = `${ROUTING_URL}/${from.lng},${from.lat};${to.longitude},${to.latitude}?overview=full&geometries=geojson`;
