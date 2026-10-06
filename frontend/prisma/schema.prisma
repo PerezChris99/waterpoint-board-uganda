@@ -182,6 +182,7 @@ model Report {
   @@index([status])
   @@index([moderationStatus])
   @@index([createdAt])
+  @@index([integrityHash])
 }
 
 model MaintenanceLog {
