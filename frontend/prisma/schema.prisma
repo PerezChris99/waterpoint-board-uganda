@@ -1,7 +1,8 @@
 // WaterPoint Board Uganda — Prisma schema
-// Postgres-only (Neon in production). Uses `prisma db push` instead of migration
-// history: this is a deliberate simplification for a demo project with fixed seed
-// data — see docs/ARCHITECTURE.md for the rationale.
+// Postgres-only (Neon in production). Production schema changes are managed exclusively through
+// versioned Prisma migrations under prisma/migrations. `prisma db push` is intentionally not part
+// of the production workflow because a national system requires an auditable, reproducible schema
+// history and controlled deployment/rollback procedures.
 
 generator client {
   provider = "prisma-client-js"
