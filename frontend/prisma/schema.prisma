@@ -144,7 +144,7 @@ model WaterPoint {
   code               String              @unique
   name               String
   type               WaterPointType
-  village            String
+  district           String?\n  village            String
   parish             String
   subCounty          String
   latitude           Float
@@ -170,7 +170,7 @@ model WaterPoint {
   updatedAt          DateTime            @updatedAt
 
   @@index([status])
-  @@index([village])
+  @@index([district])\n  @@index([village])
   @@index([caretakerId])
   @@index([verifiedById])
   @@index([organizationId])
