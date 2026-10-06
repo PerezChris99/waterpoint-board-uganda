@@ -13,7 +13,7 @@ function toCsvRow(values: (string | number | null | undefined)[]): string {
     .join(",");
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";\nexport const maxDuration = 300;
 
 export async function GET() {
   try {
