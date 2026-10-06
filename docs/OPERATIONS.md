@@ -30,6 +30,10 @@ Only perform that operation after independently confirming that the existing pro
 
 Future schema changes are created with prisma migrate dev in development and applied with prisma migrate deploy in controlled environments.
 
+## Identity and privileged access
+
+Administrators and other privileged operators must enable authenticator-app MFA before being granted production access. Password recovery invalidates active sessions and clears MFA so the verified recovery email can be used to re-enrol MFA. Disable MFA only through the authenticated security page and record the event in the audit log.
+
 ## Backup and recovery
 
 A nationwide deployment must have:
