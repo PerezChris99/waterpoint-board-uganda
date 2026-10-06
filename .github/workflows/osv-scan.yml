@@ -1,0 +1,23 @@
+name: OSV dependency scan
+
+on:
+  push:
+    branches: [perez, main, chore/national-hardening-foundation]
+  pull_request:
+    branches: [perez, main]
+  schedule:
+    - cron: "31 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google/osv-scanner-action/osv-scanner-action@v2
+        with:
+          scan-args: |-
+            --lockfile=frontend/package-lock.json
