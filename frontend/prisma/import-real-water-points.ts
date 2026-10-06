@@ -109,6 +109,7 @@ interface ImportRow {
   code: string;
   name: string;
   type: WaterPointType;
+  district: string;
   village: string;
   parish: string;
   subCounty: string;
@@ -150,6 +151,7 @@ function toImportRow(r: WpdxRecord): ImportRow | null {
     // WPDx's finest administrative resolution for Uganda is parish-level (GADM boundaries don't
     // include informal village boundaries) — village duplicates parish rather than inventing a
     // finer-grained name that doesn't exist in the source data.
+    district: r.clean_adm2,
     village: r.clean_adm4,
     parish: r.clean_adm4,
     subCounty: r.clean_adm3,
