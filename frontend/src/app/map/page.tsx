@@ -34,31 +34,23 @@ function monthKey(date: Date): string {
 }
 
 export default async function MapInsightsPage() {
-  const [waterPoints, totalWaterPoints, statusGroups, typeGroups, issueGroups, reports, villageGroups] =
+  const [waterPoints, totalWaterPoints, statusGroups, typeGroups, issueGroups, reportCount, monthlyRows, villageGroups] =
     await Promise.all([
       prisma.$queryRaw<MapSampleRow[]>`
         SELECT id, name, code, village, status, latitude, longitude
-        FROM "WaterPoint"
-        ORDER BY random()
+        FROM "WaterPoint" TABLESAMPLE SYSTEM (15)
         LIMIT ${MAP_SAMPLE_SIZE};
       `,
       prisma.waterPoint.count(),
       prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
       prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
       prisma.report.groupBy({ by: ["issueType"], _count: true }),
-      prisma.report.findMany({ select: { createdAt: true } }),
+      prisma.report.count(),
+      prisma.$queryRaw<{ month: Date; value: bigint }[]>`SELECT date_trunc('month', "createdAt") AS month, COUNT(*)::bigint AS value FROM "Report" WHERE "createdAt" >= NOW() - INTERVAL '12 months' GROUP BY 1 ORDER BY 1 ASC;`,
       prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
     ]);
 
-  const monthly = new Map<string, number>();
-  for (const report of reports) {
-    const key = monthKey(report.createdAt);
-    monthly.set(key, (monthly.get(key) ?? 0) + 1);
-  }
-  const monthlyReports = Array.from(monthly.entries())
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .slice(-12)
-    .map(([month, value]) => ({ month, value }));
+  const monthlyReports = monthlyRows.map((row) => ({ month: monthKey(row.month), value: Number(row.value) })).slice(-12);
 
   const statusData = statusGroups.map((g) => ({
     name: STATUS_LABELS[g.status as WaterPointStatus],
@@ -103,7 +95,7 @@ export default async function MapInsightsPage() {
         {[
           { label: "Water points", value: totalWaterPoints },
           { label: "Villages", value: villageGroups.length },
-          { label: "Community reports", value: reports.length },
+          { label: "Community reports", value: reportCount },
           { label: "Water point types", value: typeGroups.length },
         ].map((stat) => (
           <div
