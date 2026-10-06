@@ -1,160 +1,431 @@
 # WaterPoint Board Uganda
 
-**A full-stack community water-point tracking platform** — built with Next.js, TypeScript,
-Prisma, and PostgreSQL, deployed on Vercel.
+**National-scale water infrastructure monitoring, reporting and operational visibility for Uganda.**
 
-[![CI](https://github.com/PerezChris99/waterpoint-board-uganda/actions/workflows/ci.yml/badge.svg)](https://github.com/PerezChris99/waterpoint-board-uganda/actions/workflows/ci.yml)
-[![Live instance](https://img.shields.io/badge/live-waterpointboarduganda.vercel.app-2f7ec2)](https://waterpointboarduganda.vercel.app)
-[![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
+WaterPoint Board Uganda is a full-stack platform for making community water-point information easier to discover, report on, verify, maintain and govern. It connects public water-point visibility with operational workflows for caretakers, district-level personnel and administrators.
 
-**Live instance:** [waterpointboarduganda.vercel.app](https://waterpointboarduganda.vercel.app)
-
-> **Scope note:** This project is engineered as a national-scale community water-point transparency and
-> reporting platform for rural/peri-urban Uganda, positioned to complement (never replace)
-> National Water and Sewerage Corporation (NWSC) billing/network operations and the Ministry of
-> Water and Environment's water-point data collection. It is **not** a drinking-water
-> certification platform, a contamination-detection tool, or an official government system. The
-> publicly hosted instance's ~98,700 water points are real, imported from the open Water Point Data Exchange. The software is designed for national-scale use, but the public demo is not itself an official government service and does not claim government certification, an availability SLA, completed disaster-recovery testing, or institutional approval. A real national deployment requires the infrastructure, security assessment, data-governance, identity, backup, operational, and field-validation controls documented in [docs/NWSC-PRODUCTION-STRATEGY.md](docs/NWSC-PRODUCTION-STRATEGY.md) and [docs/OPERATIONS.md](docs/OPERATIONS.md). See also [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
+> **Production and scope statement**
+>
+> The software is engineered for national-scale use, but the repository and public deployment must not be confused with an officially commissioned Government of Uganda system. The platform does not certify drinking-water quality, detect contamination, replace Ministry of Water and Environment systems, or replace NWSC network/billing operations. A nationwide service requires institutional authorization, authoritative data reconciliation, field verification, production infrastructure, security assessment, backup/DR controls, monitoring and formal operational ownership.
+>
+> Water-point records imported from the Water Point Data Exchange (WPDx) are real source records, not invented demo data. Source provenance and observation age are preserved, and older or uncertain functionality observations are treated as **NEEDS_VERIFICATION** rather than presented as current field truth. See [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
 
 ---
 
-## What it does
+## Platform at a glance
 
-WaterPoint Board Uganda tracks the operational status of community water points — boreholes,
-shallow wells, protected springs, tap stands, and rainwater tanks — spread across real Ugandan
-towns and cities nationwide. It models a realistic end-to-end workflow:
-
-- **Anyone** can browse the public directory and search/filter water points by status, type, or
-  village.
-- **Community members** can report issues (no water, contamination concerns, physical damage,
-  vandalism) against any water point, with or without an account.
-- **Caretakers** get a dashboard of their assigned water points, triage open reports, update
-  status, and log maintenance history.
-- **Admins** manage user roles, review a full audit trail, and view analytics dashboards with a
-  one-click CSV export.
-
-## Feature highlights
-
-| Area | What's implemented |
+| Capability | Status |
 | --- | --- |
-| 🗺️ Public directory | Search + filter by status/type/village, freshness indicators, full report & maintenance history per water point |
-| 📝 Community reporting | Anonymous or authenticated issue reporting, rate-limited, validated with Zod |
-| 🧰 Caretaker tools | Per-caretaker dashboard, status updates, maintenance logging |
-| 🛠️ Admin tools | Role management, audit/activity feed, CSV export |
-| 📊 Analytics | Status/issue/village breakdowns with Recharts |
-| 🔐 Auth & RBAC | Custom credentials auth (bcrypt + signed JWT cookie), Edge middleware route protection, server-side re-checks on every mutation |
-| 🛡️ Security | CSP + security headers, input validation on every endpoint, per-IP rate limiting, audit logging |
-| ♿ Accessibility | Skip-to-content link, semantic HTML/ARIA labeling, reduced-motion support, keyboard-navigable forms |
-| 🔎 SEO | Metadata API, sitemap/robots, OpenGraph & Twitter cards |
-| � Real water data | ~98,700 real Uganda water points imported from the open Water Point Data Exchange (WPDx), with honest status handling for older field reports |
-| 🌱 Dev/test seed data | 153 fictional water points, 24 users, hundreds of reports/maintenance logs for local dev and CI — deterministic and idempotent, never run against the live deployment |
+| Public water-point directory, search and filtering | Implemented |
+| Water-point detail, status and history | Implemented |
+| Community issue reporting | Implemented |
+| Caretaker assignment, triage and maintenance workflows | Implemented |
+| Role-based administration | Implemented |
+| Audit logging and provenance | Implemented |
+| Analytics and CSV export | Implemented |
+| Authentication, MFA and authorization controls | Implemented |
+| API validation, pagination and distributed rate limiting | Implemented |
+| Security headers, CSP and automated security scanning | Implemented |
+| WPDx Uganda real-data import/seed | Implemented |
+| Production health/readiness verification | Implemented |
+| k6 national-scale load-test harness | Implemented |
+| Automated email/SMS delivery | Provider-dependent |
+| Production monitoring/alerting | Infrastructure-dependent |
+| PITR, independent backups and tested disaster recovery | Infrastructure-dependent |
+| MWE/WEMIS/WASMIS institutional reconciliation | Requires authorized operational access |
+| Formal nationwide commissioning/SLA | Not claimed |
 
-## Tech stack
+## Core operating model
 
-| Layer | Technology |
-| --- | --- |
-| Framework | [Next.js](https://nextjs.org) 16 (App Router, React Server Components, Route Handlers) |
-| Language | TypeScript (strict mode) |
-| Styling | Tailwind CSS v4, CSS-variable design tokens |
-| Database / ORM | PostgreSQL ([Neon](https://neon.tech) serverless) + [Prisma](https://www.prisma.io) |
-| Auth | Custom — `bcryptjs` + `jose` (JWT), `httpOnly` cookies, Edge middleware |
-| Validation | [Zod](https://zod.dev) |
-| Charts | [Recharts](https://recharts.org) |
-| Testing | Vitest, React Testing Library, jest-axe |
-| CI/CD | GitHub Actions → Vercel |
+The platform is designed around a simple operational loop:
+
+**Discover → Report → Triage → Maintain → Verify → Monitor**
+
+- **Citizens/community members** discover a water point and report an observed problem.
+- **Caretakers/district personnel** receive and triage reports, update operational status and record maintenance.
+- **Administrators** oversee users, audit history, analytics and operational visibility.
+- **Verification authorities** can reconcile platform records against authoritative field/institutional sources before information is treated as current official data.
+
+---
+
+## System flows
+
+### 1. Water-point lifecycle
+
+~~~mermaid
+flowchart LR
+    A[WPDx / authorized source records] --> B[Import + validation]
+    B --> C[Water-point record]
+    C --> D[Public discovery]
+    D --> E[Community observation]
+    E --> F[Issue report]
+    F --> G[Triage]
+    G --> H[Maintenance / corrective action]
+    H --> I[Status update]
+    I --> J[Verification]
+    J --> C
+    C --> K[Analytics + operational visibility]
+~~~
+
+### 2. Community reporting flow
+
+~~~mermaid
+flowchart TD
+    A[Community member] --> B[Select water point]
+    B --> C[Submit issue]
+    C --> D[Request validation]
+    D --> E{Valid?}
+    E -- No --> F[Return validation error]
+    E -- Yes --> G[Create report]
+    G --> H[Audit event]
+    G --> I[Assigned caretaker / operational queue]
+    I --> J[Triage]
+    J --> K{Action required?}
+    K -- No --> L[Resolve / close]
+    K -- Yes --> M[Maintenance]
+    M --> N[Update status + maintenance history]
+    N --> O[Verification / follow-up]
+    O --> L
+~~~
+
+### 3. Authenticated request flow
+
+~~~mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Middleware
+    participant R as Next.js Route Handler
+    participant V as Validation/RBAC
+    participant P as Prisma
+    participant DB as PostgreSQL
+    participant A as Audit Log
+
+    U->>M: HTTPS request
+    M->>M: Rate-limit + session check
+    M->>R: Authorized request
+    R->>V: Validate input + permissions
+    V-->>R: Approved
+    R->>P: Query / mutation
+    P->>DB: SQL
+    DB-->>P: Result
+    R->>A: Record privileged/security event
+    R-->>U: JSON response
+~~~
+
+### 4. Production release flow
+
+~~~mermaid
+flowchart LR
+    A[Feature / fix / security change] --> B[perez integration branch]
+    B --> C[CI + lint + typecheck + tests + build]
+    C --> D[Security scans]
+    D --> E[Pull Request]
+    E --> F[main]
+    F --> G[Production deployment]
+    G --> H[Health / smoke verification]
+    H --> I[Monitor + rollback if required]
+~~~
+
+The repository's intended release path is:
+
+**feature/fix/security/chore/perf/refactor → perez → main → production**
+
+Direct pushes to 'main' are not part of the normal release process.
+
+---
+
+## Key features
+
+### Public water-point intelligence
+- Search and filter water points by operational status, type, district and village.
+- Water-point detail pages with status, freshness and available history.
+- Geographic/map presentation.
+- Real source identifiers and provenance for imported records.
+- Conservative status handling when source observations are old or uncertain.
+
+### Community reporting
+- Anonymous or authenticated issue reporting.
+- Input validation with Zod.
+- Rate limiting.
+- Supported operational issue categories such as service failure, physical damage and vandalism.
+- Reports feed the caretaker/operational workflow.
+
+### Caretaker and operational workflows
+- Assigned water-point visibility.
+- Report triage.
+- Status updates.
+- Maintenance history.
+- Escalation logic for unresolved reports.
+- Optional email/SMS notification integrations when providers are configured.
+
+### Administration and governance
+- Role-based access control.
+- MFA support for privileged access.
+- Audit/activity logging.
+- Analytics and CSV export.
+- User and operational administration.
+- Security-sensitive mutations are re-authorized server-side rather than relying only on UI restrictions.
+
+### Security and reliability
+- Signed JWT session cookies with secure/httpOnly controls.
+- Password hashing with bcrypt.
+- MFA/TOTP support.
+- CSP and security headers.
+- Zod validation.
+- Distributed API/auth rate limiting.
+- Audit logging with integrity protections.
+- Pagination and bounded API queries.
+- Automated CI, CodeQL, OSV and secret scanning.
+- Production health/readiness endpoint.
+- Versioned Prisma migration workflow.
+
+---
+
+## Data provenance and integrity
+
+The production-safe seed path does **not** manufacture realistic-looking national data.
+
+Water-point records are imported from **Water Point Data Exchange (WPDx) Uganda records**, with:
+- source WPDx identifiers retained;
+- source coordinates validated against Uganda geographic bounds;
+- source administrative fields preserved;
+- source observation dates retained;
+- old observations conservatively marked **NEEDS_VERIFICATION**;
+- provenance recorded through the platform's verification metadata.
+
+The seed requires a real operator email/password through environment variables and does not embed demo credentials or fabricate users, organizations, phone numbers, reports, maintenance events or coordinates.
+
+For national commissioning, WPDx should be reconciled against the authoritative Ministry of Water and Environment systems and District Water Officer records. This repository does not claim that an external dataset is automatically equivalent to current field truth.
+
+---
 
 ## Architecture
 
-```
-Next.js App Router (Server Components + Route Handlers)
-        |
-        |-- middleware.ts (Edge)  ->  JWT session verification, role-gated redirects
-        |-- Route Handlers (/api/**) -> Zod validation -> Prisma -> Postgres
-        v
-Prisma ORM  ->  PostgreSQL (Neon serverless)
-```
+~~~text
+                         ┌─────────────────────────┐
+                         │       Web Browser        │
+                         │ Public + Authenticated UI│
+                         └────────────┬────────────┘
+                                      │ HTTPS
+                                      ▼
+                         ┌─────────────────────────┐
+                         │       Next.js 16        │
+                         │ App Router + Route APIs │
+                         └────────────┬────────────┘
+                                      │
+                         ┌────────────┴────────────┐
+                         │                         │
+                  ┌──────▼──────┐          ┌──────▼──────┐
+                  │ Middleware  │          │ Route       │
+                  │ Auth/RBAC   │          │ Handlers    │
+                  │ Rate Limit  │          │ Validation  │
+                  └─────────────┘          └──────┬──────┘
+                                                   │
+                                            ┌──────▼──────┐
+                                            │   Prisma    │
+                                            │     ORM     │
+                                            └──────┬──────┘
+                                                   │
+                                            ┌──────▼──────┐
+                                            │ PostgreSQL  │
+                                            │   Database  │
+                                            └─────────────┘
 
-One deployable service, one database — see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the
-full breakdown and the reasoning behind retiring an earlier separate-backend design.
+External integrations:
+WPDx → real-data import
+Upstash → distributed rate limiting
+Email/SMS providers → optional notifications
+Vercel → deployment/runtime
+~~~
 
-## Project structure
+### Technology stack
 
-```
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 16, App Router |
+| Language | TypeScript, strict mode |
+| UI | React + Tailwind CSS |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Authentication | bcryptjs + jose/JWT + httpOnly cookies |
+| MFA | TOTP |
+| Validation | Zod |
+| Charts | Recharts |
+| Maps | MapLibre |
+| Rate limiting | Upstash-compatible Redis REST store |
+| Testing | Vitest, React Testing Library, jest-axe |
+| Load testing | k6 |
+| CI/CD | GitHub Actions + Vercel |
+| Security scanning | CodeQL, OSV, secret scanning |
+
+---
+
+## Repository structure
+
+~~~text
 waterpoint-board-uganda/
-├── frontend/                 Next.js app (the entire product)
-│   ├── prisma/                schema.prisma + deterministic seed.ts
-│   └── src/
-│       ├── app/                routes: public pages, /dashboard/*, /api/**
-│       ├── components/         shared UI (nav, forms, charts)
-│       ├── lib/                db, auth, validation, rbac, rate-limit, audit
-│       └── middleware.ts       Edge route protection
-├── .github/                  CI, security scanning, ownership and dependency automation
-├── docs/                      Architecture, API, security, deployment, data methodology, etc.
-└── .github/workflows/ci.yml   Lint, typecheck, test, build
-```
+├── frontend/
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   ├── src/
+│   │   ├── app/              # Pages, dashboards and API routes
+│   │   ├── components/       # Shared UI components
+│   │   ├── lib/              # Auth, DB, RBAC, validation, audit, etc.
+│   │   └── middleware.ts     # Request protection
+│   ├── vercel.json            # Production cron configuration
+│   └── package.json
+├── tests/
+│   └── load/                 # k6 performance/load tests
+├── scripts/
+│   └── verify-production.mjs # Production health verification
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── API.md
+│   ├── SECURITY.md
+│   ├── DATA-METHODOLOGY.md
+│   ├── DEPLOYMENT.md
+│   ├── OPERATIONS.md
+│   └── ...
+└── .github/
+    └── workflows/            # CI and security automation
+~~~
 
-## Getting started
+---
 
-### Prerequisites
+## Local development
 
-- Node.js 24
-- A reachable PostgreSQL database
+### Requirements
 
-```bash
+- Node.js 24.x
+- PostgreSQL
+- npm
+
+### Setup
+
+~~~bash
 cd frontend
 npm install
 cp .env.example .env.local
-# Fill in DATABASE_URL, JWT_SECRET and a real operator email/password:
-# SEED_ADMIN_EMAIL=your-real-email
-# SEED_ADMIN_PASSWORD=a-private-password-of-16+-characters
+~~~
+
+Configure the required environment variables, including a development database, JWT secret and private seed operator credentials.
+
+Then:
+
+~~~bash
 npx prisma generate
 npm run db:migrate
 npm run db:seed
 npm run dev
-```
+~~~
 
-The seed is **not a demo-data generator**. It retrieves real Uganda water-point records from the Water Point Data Exchange (WPDx), validates coordinates and administrative fields, preserves source identifiers, and marks old functionality observations as NEEDS_VERIFICATION. It creates no fictional water points, coordinates, phone numbers, organisations, reports, or maintenance events. The only account it can create is the real operator account supplied through SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD.
+The seed is **real-data-only** for water-point records. It retrieves WPDx Uganda data and validates it before insertion. Do not point a development seed operation at production unless you understand the reset controls and operational consequences.
 
-For the authoritative national operational baseline, reconcile WPDx records with the Ministry of Water and Environment's WEMIS/WASMIS records and the responsible District Water Officers before commissioning the system nationally. See [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md).
+See [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-## Test commands
+---
 
-```bash
+## Testing and quality gates
+
+~~~bash
+cd frontend
+
 npm run lint
 npm run typecheck
 npm run test
 npm run build
-```
+~~~
 
-## Deployment
+Production health verification:
 
-Deployed on Vercel with a Neon Postgres database. Production uses versioned Prisma migrations, distributed rate limiting, security scanning, and controlled release gates — see
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full step-by-step guide (env vars, schema push,
-seeding, and verification).
+~~~bash
+PRODUCTION_URL=https://your-production-domain.example.com npm run test:production
+~~~
+
+Load testing:
+
+~~~bash
+BASE_URL=https://your-production-domain.example.com k6 run ../tests/load/waterpoint-api.js
+~~~
+
+The load test is deliberately separate from normal CI because performance testing must target an explicitly selected environment.
+
+---
+
+## Production readiness boundary
+
+The application codebase contains the controls required for a strong production baseline, but **software readiness is not the same thing as nationwide commissioning**.
+
+Still requiring real operational/infrastructure evidence:
+
+- Production PostgreSQL instance and capacity configuration.
+- Point-in-time recovery and independent encrypted backups.
+- Tested database restore and disaster-recovery environment/procedure.
+- Production monitoring and alerting.
+- Production domain/DNS/TLS configuration.
+- Production notification provider and delivery monitoring where required.
+- Deployment/account capacity sufficient for the intended traffic profile.
+- Formal load/stress results against the actual production infrastructure.
+- Independent security/penetration assessment.
+- Authoritative MWE/WEMIS/WASMIS reconciliation.
+- District Water Officer field-validation process.
+- National data ownership, retention, correction and access governance.
+- Formal RTO/RPO/SLA acceptance and operational ownership.
+
+These are intentionally not represented as completed merely because the corresponding application code exists.
+
+---
 
 ## Documentation
 
-| Doc | Contents |
+| Document | Purpose |
 | --- | --- |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, data model, request flow |
-| [docs/API.md](docs/API.md) | Full Route Handler reference |
-| [docs/SECURITY.md](docs/SECURITY.md) | Auth, authorization, validation, rate limiting, known limitations |
-| [docs/PRIVACY.md](docs/PRIVACY.md) | What data is collected and why |
-| [docs/DATA-METHODOLOGY.md](docs/DATA-METHODOLOGY.md) | Real water point data provenance, dev/test seed data, what this platform does *not* do |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Vercel + Neon deployment guide |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Branch workflow, PR checklist |
-| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Nationwide operations, recovery, governance and honesty policy |
-| [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) | Phase-by-phase build log |
-| [docs/DESIGN_BLUEPRINT.md](docs/DESIGN_BLUEPRINT.md) | Design/implementation standard followed for all UI work |
-| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Notable changes |
+| [Architecture](docs/ARCHITECTURE.md) | System architecture and data model |
+| [API](docs/API.md) | API/Route Handler reference |
+| [Security](docs/SECURITY.md) | Authentication, authorization and security controls |
+| [Privacy](docs/PRIVACY.md) | Data collection and privacy considerations |
+| [Data Methodology](docs/DATA-METHODOLOGY.md) | Data provenance, verification and seed policy |
+| [Deployment](docs/DEPLOYMENT.md) | Deployment, environment and migration procedures |
+| [Operations](docs/OPERATIONS.md) | Recovery, monitoring, governance and operational runbook |
+| [Contributing](docs/CONTRIBUTING.md) | Development and release workflow |
+| [Development Plan](docs/DEVELOPMENT_PLAN.md) | Project implementation plan |
+| [Design Blueprint](docs/DESIGN_BLUEPRINT.md) | UI/design implementation standards |
+| [Changelog](docs/CHANGELOG.md) | Notable project changes |
 
-## Git workflow
+---
 
-`feature/*` → `perez` (integration) → `main` (production). `main` is the default/production
-branch; never push directly to `main` or `perez` — see
-[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+## Release and contribution workflow
 
-## License
+~~~text
+feature/fix/security/chore/perf/refactor
+                    │
+                    ▼
+                 perez
+                    │
+              Pull Request
+                    │
+                    ▼
+                  main
+                    │
+                    ▼
+              Production
+~~~
 
-MIT — see [LICENSE](LICENSE).
+'main' is the default/production branch. Changes should reach it through the pull-request workflow and required automated checks.
 
+---
+
+## License and copyright
+
+This project is licensed under the **MIT License**.
+
+**Copyright © 2026 PerezChris99.**
+
+See [LICENSE](LICENSE) for the complete license text.
+
+---
+
+## Project principle
+
+**Beautiful on the surface. Solid underneath. Built for production.**
