@@ -57,27 +57,15 @@ is requested if the visitor declines.
 
 ## Rate limiting
 
-An in-memory limiter (`src/lib/rate-limit.ts`) throttles login, registration, and report
-submission per IP.
+Production deployments must use the distributed Upstash Redis limiter and set RATE_LIMIT_FAIL_CLOSED=true. The in-memory limiter is a development fallback and is not considered a nationwide production control. Login is limited both by source IP and normalized account identifier.
 
-### Known limitations
+## Health & readiness
 
-- The rate limiter is **per warm serverless instance**, not distributed. Under real multi-instance
-  production traffic it blunts casual abuse but is not a substitute for an edge/WAF-level control
-  or a shared store (e.g. Upstash Redis) for strict guarantees. Documented here deliberately
-  rather than overstating the protection.
-- `Content-Security-Policy` allows `'unsafe-inline'` for `script-src`/`style-src` because Next.js
-  injects inline hydration data and Tailwind emits inline styles; a stricter nonce-based CSP is a
-  reasonable future hardening step.
-- No error-tracking/APM (e.g. Sentry) is wired up; server errors are only visible in platform logs.
-- `/api/water-points` has a hard `take: 2000` safety cap but no real offset/cursor pagination —
-  fine at current (~150 seed points) scale, worth revisiting before a large real-world rollout.
-- The OSRM public demo routing server (`router.project-osrm.org`) is explicitly documented by
-  its maintainers as light-use/evaluation-only, not a production SLA. At real-world scale this
-  should move to a self-hosted OSRM instance or a paid routing provider. OpenFreeMap's tile
-  service is intended for production use and has no such caveat.
+GET /api/health is dynamic and checks database connectivity plus required production security controls. It returns 503 when production controls are incomplete or the database is unavailable.
 
 ## Audit logging
+
+New audit records carry an HMAC integrity hash using AUDIT_HMAC_SECRET. This is tamper-evident rather than a substitute for an independent immutable audit store. Existing legacy records may have a null integrity hash and must be retained as historical data unless separately migrated.
 
 Sensitive actions (login, registration, role changes, status changes, report status changes,
 maintenance log entries) are recorded in the `AuditLog` table with actor, action, entity, and
@@ -85,7 +73,7 @@ metadata — never with secrets.
 
 ## Dependency scanning
 
-`npm audit` runs in CI (non-blocking) on every pull request.
+CI runs a blocking production dependency audit, dependency review on pull requests, CodeQL, and secret scanning. Full development dependency audit results are retained as CI artifacts. Dependabot is configured for weekly updates.
 
 ## Security audit findings (2026, deep review)
 
@@ -142,16 +130,11 @@ only the positive claims above.
    credential-stuffing attempt against one specific account from many IPs. Fixed: `POST
    /api/auth/login` now also enforces a second limit keyed by the normalized email address, so an
    attacker spreading login attempts against one account across many IPs is still throttled.
-5. **`deepmerge-ts` high-severity advisory** (via `@prisma/config` → `prisma` CLI, confirmed still
-   present via `npm audit`) remains unresolved. It is a CLI/dev-time-only dependency — not bundled
-   into deployed serverless functions — so it is not exploitable in the running production app.
-   The fix requires a semver-major Prisma upgrade and has been deliberately deferred; flagged here
-   so it isn't mistaken for an oversight.
-6. **Minor: role-update route returned a generic 500 instead of 404 — fixed.** Given a
-   non-existent user id, `prisma.user.update` threw `P2025`, caught by the generic error handler
-   and reported as a 500. Fixed: the route now checks for the user's existence first and returns
-   a clean 404 ("User not found") instead.
-7. **Demo credentials are intentionally public** (by design, already documented above) — correct
+5. **deepmerge-ts high-severity advisory — fixed.** The vulnerable transitive Prisma CLI dependency is now forced to patched deepmerge-ts 8.0.2 through a package override and a matching lockfile entry. CI scans the lockfile with OSV and runs npm audit. This override should be removed once the upstream Prisma dependency itself resolves to a patched deepmerge-ts release.
+
+6. **Minor: role-update route returned a generic 500 instead of 404 — fixed.** The route now checks that the user exists before attempting the update and returns 404 for an unknown ID.
+
+7. **Demo credentials are intentionally public** are intentionally public** (by design, already documented above) — correct
    for a portfolio demo, but a reminder that this exact pattern (public admin password in seed
    data) must never be reused as-is for a real deployment with real user data.
 

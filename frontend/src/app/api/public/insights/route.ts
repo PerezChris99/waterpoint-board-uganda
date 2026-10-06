@@ -3,71 +3,40 @@ import { prisma } from "@/lib/db";
 import { TYPE_LABELS, STATUS_LABELS, ISSUE_LABELS } from "@/lib/labels";
 import type { WaterPointType, WaterPointStatus, ReportIssueType } from "@prisma/client";
 
-// Public, unauthenticated aggregate data for the map + statistics page.
-// No PII (reporter identity, emails, caretaker names) is ever included here.
-// Forced dynamic so this never runs as part of the build's static prerender step - a build
-// should never fail just because the DB is briefly unreachable or a migration hasn't landed yet.
 export const dynamic = "force-dynamic";
-
-function monthKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
+const MAP_SAMPLE_SIZE = 15000;
 
 export async function GET() {
-  const [waterPoints, statusGroups, typeGroups, issueGroups, reports, villageGroups] = await Promise.all([
-    prisma.waterPoint.findMany({
-      select: {
-        id: true,
-        name: true,
-        code: true,
-        type: true,
-        status: true,
-        village: true,
-        latitude: true,
-        longitude: true,
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
-    prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
-    prisma.report.groupBy({ by: ["issueType"], _count: true, where: { moderationStatus: "APPROVED" } }),
-    prisma.report.findMany({ where: { moderationStatus: "APPROVED" }, select: { createdAt: true } }),
-    prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
-  ]);
+  const [waterPoints, totalWaterPoints, statusGroups, typeGroups, issueGroups, totalReports, monthlyRows, villageGroups] =
+    await Promise.all([
+      prisma.$queryRaw<{ id: string; name: string; code: string; type: WaterPointType; status: WaterPointStatus; village: string; latitude: number; longitude: number }>`
+        SELECT id, name, code, type, status, village, latitude, longitude
+        FROM "WaterPoint" TABLESAMPLE SYSTEM (15)
+        LIMIT ${MAP_SAMPLE_SIZE};
+      `,
+      prisma.waterPoint.count(),
+      prisma.waterPoint.groupBy({ by: ["status"], _count: true }),
+      prisma.waterPoint.groupBy({ by: ["type"], _count: true }),
+      prisma.report.groupBy({ by: ["issueType"], _count: true, where: { moderationStatus: "APPROVED" } }),
+      prisma.report.count({ where: { moderationStatus: "APPROVED" } }),
+      prisma.$queryRaw<{ month: Date; value: bigint }[]>`
+        SELECT date_trunc('month', "createdAt") AS month, COUNT(*)::bigint AS value
+        FROM "Report"
+        WHERE "moderationStatus" = 'APPROVED' AND "createdAt" >= NOW() - INTERVAL '12 months'
+        GROUP BY 1 ORDER BY 1 ASC;
+      `,
+      prisma.waterPoint.groupBy({ by: ["village"], _count: true }),
+    ]);
 
-  const monthly = new Map<string, number>();
-  for (const report of reports) {
-    const key = monthKey(report.createdAt);
-    monthly.set(key, (monthly.get(key) ?? 0) + 1);
-  }
-  const monthlyReports = Array.from(monthly.entries())
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .slice(-12)
-    .map(([month, value]) => ({ month, value }));
+  const monthlyReports = monthlyRows.map((row) => ({ month: row.month.toISOString().slice(0, 7), value: Number(row.value) })).slice(-12);
 
   return NextResponse.json({
     waterPoints,
-    statusCounts: statusGroups.map((g) => ({
-      name: STATUS_LABELS[g.status as WaterPointStatus],
-      value: g._count,
-    })),
-    typeCounts: typeGroups.map((g) => ({
-      name: TYPE_LABELS[g.type as WaterPointType],
-      value: g._count,
-    })),
-    issueCounts: issueGroups.map((g) => ({
-      name: ISSUE_LABELS[g.issueType as ReportIssueType],
-      value: g._count,
-    })),
+    statusCounts: statusGroups.map((g) => ({ name: STATUS_LABELS[g.status as WaterPointStatus], value: g._count })),
+    typeCounts: typeGroups.map((g) => ({ name: TYPE_LABELS[g.type as WaterPointType], value: g._count })),
+    issueCounts: issueGroups.map((g) => ({ name: ISSUE_LABELS[g.issueType as ReportIssueType], value: g._count })),
     monthlyReports,
-    villageCounts: villageGroups
-      .map((g) => ({ name: g.village, value: g._count }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 10),
-    totals: {
-      waterPoints: waterPoints.length,
-      reports: reports.length,
-      villages: villageGroups.length,
-    },
-  });
+    villageCounts: villageGroups.map((g) => ({ name: g.village, value: g._count })).sort((a, b) => b.value - a.value).slice(0, 10),
+    totals: { waterPoints: totalWaterPoints, reports: totalReports, villages: villageGroups.length },
+  }, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
 }

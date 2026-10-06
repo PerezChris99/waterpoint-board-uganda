@@ -3,6 +3,7 @@ import { verifySessionToken } from "@/lib/jwt";
 import { SESSION_COOKIE } from "@/lib/session";
 
 const ROLE_PREFIXES: Record<string, string[]> = {
+  "/dashboard/security": ["ADMIN", "CARETAKER", "MEMBER"],
   "/dashboard/admin": ["ADMIN"],
   "/dashboard/caretaker": ["ADMIN", "CARETAKER"],
   "/dashboard/member": ["ADMIN", "CARETAKER", "MEMBER"],
