@@ -2,7 +2,7 @@ name: OSV dependency scan
 
 on:
   push:
-    branches: [perez, main, chore/national-hardening-foundation]
+    branches: [perez, main]
   pull_request:
     branches: [perez, main]
   schedule:
