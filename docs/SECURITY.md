@@ -130,16 +130,11 @@ only the positive claims above.
    credential-stuffing attempt against one specific account from many IPs. Fixed: `POST
    /api/auth/login` now also enforces a second limit keyed by the normalized email address, so an
    attacker spreading login attempts against one account across many IPs is still throttled.
-5. **`deepmerge-ts` high-severity advisory** (via `@prisma/config` → `prisma` CLI, confirmed still
-   present via `npm audit`) remains unresolved. It is a CLI/dev-time-only dependency — not bundled
-   into deployed serverless functions — so it is not exploitable in the running production app.
-   The fix requires a semver-major Prisma upgrade and has been deliberately deferred; flagged here
-   so it isn't mistaken for an oversight.
-6. **Minor: role-update route returned a generic 500 instead of 404 — fixed.** Given a
-   non-existent user id, `prisma.user.update` threw `P2025`, caught by the generic error handler
-   and reported as a 500. Fixed: the route now checks for the user's existence first and returns
-   a clean 404 ("User not found") instead.
-7. **Demo credentials are intentionally public** (by design, already documented above) — correct
+5. **deepmerge-ts high-severity advisory — fixed.** The vulnerable transitive Prisma CLI dependency is now forced to patched deepmerge-ts 8.0.2 through a package override and a matching lockfile entry. CI scans the lockfile with OSV and runs npm audit. This override should be removed once the upstream Prisma dependency itself resolves to a patched deepmerge-ts release.
+
+6. **Minor: role-update route returned a generic 500 instead of 404 — fixed.** The route now checks that the user exists before attempting the update and returns 404 for an unknown ID.
+
+7. **Demo credentials are intentionally public** are intentionally public** (by design, already documented above) — correct
    for a portfolio demo, but a reminder that this exact pattern (public admin password in seed
    data) must never be reused as-is for a real deployment with real user data.
 
