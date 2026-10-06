@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [perez, main, chore/national-hardening-foundation]
+    branches: [perez, main]
   push:
     branches: [perez, main]
   workflow_dispatch:
