@@ -10,7 +10,6 @@ export const registerSchema = z.object({
     .regex(/[a-z]/, "Password must include a lowercase letter")
     .regex(/[A-Z]/, "Password must include an uppercase letter")
     .regex(/[0-9]/, "Password must include a digit"),
-  district: z.string().trim().max(100).optional(),
   village: z.string().trim().max(100).optional(),
 });
 
@@ -84,4 +83,5 @@ export const waterPointQuerySchema = z.object({
   q: z.string().trim().max(200).optional(),
   cursor: z.string().cuid().optional(),
   limit: z.coerce.number().int().min(1).max(500).default(100),
+  district: z.string().trim().max(100).optional(),
 });
