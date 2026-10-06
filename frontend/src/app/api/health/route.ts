@@ -12,7 +12,7 @@ export async function GET() {
         !process.env.JWT_SECRET ? "JWT_SECRET" : null,
         !process.env.AUDIT_HMAC_SECRET ? "AUDIT_HMAC_SECRET" : null,
         !process.env.UPSTASH_REDIS_REST_URL ? "UPSTASH_REDIS_REST_URL" : null,
-        !process.env.UPSTASH_REDIS_REST_TOKEN ? "UPSTASH_REDIS_REST_TOKEN" : null,
+        !process.env.UPSTASH_REDIS_REST_TOKEN ? "UPSTASH_REDIS_REST_TOKEN" : null,\n        !process.env.CRON_SECRET ? "CRON_SECRET" : null,
       ].filter((value): value is string => value !== null)
     : [];
 
