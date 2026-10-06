@@ -23,7 +23,8 @@
     "db:migrate:status": "prisma migrate status",
     "db:baseline:production": "prisma migrate resolve --applied 00000000000000_initial",
     "db:seed": "tsx prisma/seed.ts",
-    "db:import-real-water-points": "tsx prisma/import-real-water-points.ts"
+    "db:import-real-water-points": "tsx prisma/import-real-water-points.ts",
+    "vercel-build": "prisma migrate deploy && next build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
