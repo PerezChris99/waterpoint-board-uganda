@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import maplibregl, { type Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import { type GeoJSONSource, type Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { STATUS_TONE } from "@/lib/labels";
 import type { WaterPointStatus } from "@prisma/client";
@@ -229,7 +230,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
         },
       });
 
-      map.on("click", "water-points-clusters", async (e) => {
+      map.on("click", "water-points-clusters", async (e: MapLayerMouseEvent) => {
         const feature = e.features?.[0];
         if (!feature) return;
         const clusterId = (feature.properties as { cluster_id: number }).cluster_id;
@@ -260,7 +261,7 @@ export function WaterPointsMap({ waterPoints }: { waterPoints: MapWaterPoint[] }
         map.getCanvas().style.cursor = "";
       });
 
-      map.on("click", "water-points-circle", (e) => {
+      map.on("click", "water-points-circle", (e: MapLayerMouseEvent) => {
         const feature = e.features?.[0];
         if (!feature) return;
         const props = feature.properties as { id: string; name: string; code: string; village: string };
