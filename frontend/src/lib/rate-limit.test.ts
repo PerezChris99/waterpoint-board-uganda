@@ -35,6 +35,7 @@ describe("rateLimit", () => {
 
   it("fails closed in production when Upstash is unreachable", async () => {
     vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("RATE_LIMIT_FAIL_CLOSED", "true");
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
